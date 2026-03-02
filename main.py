@@ -8,21 +8,21 @@ from dotenv import load_dotenv
 from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
 
-import db
+import client
 from session import Session
 from commands import dispatch
 from completers import ReplCompleter
 
 load_dotenv()
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://localhost/snippets")
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 EXPORT_DIR = os.environ.get("EXPORT_DIR", "./exports")
 
 
 def main():
-    conn = db.init_db(DATABASE_URL)
+    client.init(BACKEND_URL)
     session = Session()
-    completer = ReplCompleter(conn)
+    completer = ReplCompleter()
 
     history_dir = Path.home() / ".snippets_cli"
     history_dir.mkdir(exist_ok=True)
@@ -34,7 +34,7 @@ def main():
         try:
             src_label = ""
             if session.current_source_id:
-                src = db.get_source(conn, session.current_source_id)
+                src = client.get_source(session.current_source_id)
                 if src:
                     src_label = f' [{src["name"][:20]}]'
 
@@ -44,10 +44,8 @@ def main():
             print("\nBye!")
             break
 
-        if not dispatch(user_input, conn, session, EXPORT_DIR):
+        if not dispatch(user_input, session, EXPORT_DIR):
             break
-
-    conn.close()
 
 
 if __name__ == "__main__":

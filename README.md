@@ -2,26 +2,34 @@
 
 A terminal-based note-taking REPL that stores Markdown snippets in PostgreSQL with source citations, tags, locator references, and Markdown export.
 
+The CLI talks to a REST backend ([SnippetsBackend](../SnippetsBackend)) — start the backend before running the CLI.
+
 ## Setup
+
+### 1. Start the backend
+
+See [SnippetsBackend](../SnippetsBackend) for setup. Once running, it listens on `http://localhost:8000` by default.
+
+### 2. Install CLI dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and set your database connection:
+### 3. Configure
+
+Copy `.env.example` to `.env`:
 
 ```
-DATABASE_URL=postgresql://user:password@host:port/dbname   # PostgreSQL connection string
-EXPORT_DIR=./exports                                        # Directory for generated Markdown exports
+BACKEND_URL=http://localhost:8000   # URL of the running SnippetsBackend
+EXPORT_DIR=./exports                # Directory for generated Markdown exports
 ```
 
 ## Run
 
 ```bash
-python main.py
+python3 main.py
 ```
-
-The app runs the schema on first launch (requires a PostgreSQL database).
 
 ## Commands
 
@@ -72,7 +80,7 @@ The token is stripped from the stored body and shown in export metadata.
 ## Example Session
 
 ```
-$ python main.py
+$ python3 main.py
 Snippets CLI ready. Type 'help' for commands.
 
 snippets> Knowledge is justified true belief p42
@@ -149,7 +157,7 @@ Export: ./exports/tag_1_philosophy.md (1 notes)
 (opens in bat/less)
 
 snippets> va Plato
-Export: ./exports/author_plato.md (4 notes)
+Export: ./exports/author_plato_.md (4 notes)
 (opens in bat/less)
 
 snippets> exit
@@ -158,7 +166,7 @@ Bye!
 
 ## Schema
 
-See `schema.sql` for the full PostgreSQL schema. Tables:
+See `schema.sql` (or [SnippetsBackend/schema.sql](../SnippetsBackend/schema.sql)) for the full PostgreSQL schema. Tables:
 
 - `notes` — Markdown snippets with optional source link and locator
 - `sources` — Bibliographic sources (books, articles, etc.)
@@ -171,13 +179,13 @@ See `schema.sql` for the full PostgreSQL schema. Tables:
 ## Architecture
 
 ```
-main.py        REPL entry point + command dispatch
-db.py          Data access layer (all SQL queries)
+main.py        REPL entry point — initialises HTTP client, runs the prompt loop
+client.py      HTTP client — mirrors the db API, talks to SnippetsBackend
 session.py     Session state (current source, note tracking)
 commands.py    Command implementations + dispatch parser
 export.py      Markdown export generation
 completers.py  prompt_toolkit completers (REPL + NSE fields)
 picker.py      Interactive snippet picker for viewing/tagging notes
 locator.py     Locator token parsing (page/time references)
-schema.sql     PostgreSQL DDL + seed data
+schema.sql     PostgreSQL DDL + seed data (reference copy)
 ```
