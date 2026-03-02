@@ -8,7 +8,7 @@ The CLI talks to a REST backend ([SnippetsBackend](../SnippetsBackend)) — star
 
 ### 1. Start the backend
 
-See [SnippetsBackend](../SnippetsBackend) for setup. Once running, it listens on `http://localhost:8000` by default.
+See [SnippetsBackend](https://github.com/banglabs-eu/SnippetsBackend) for setup. Once running, it listens on `http://localhost:8000` by default.
 
 ### 2. Install CLI dependencies
 
