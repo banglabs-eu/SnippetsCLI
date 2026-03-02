@@ -31,12 +31,12 @@ Everything is typed inline at the prompt. The only interactive mode is `nse` (so
 |---------|-------------|
 | `<text>` | Just type — any unrecognized input is saved as a note |
 | `s <name_or_id>` | Set session source (Tab to autocomplete) |
-| `s clear` | Unset source — future notes have no source |
+| `s clear` / `s none` | Unset source — future notes have no source |
 | `s` | Show current source |
 | `s<id> +t <tags>` | Add tag(s) to a note (e.g. `s2 +t cheese, bread`) |
 | `s<id> -t <tags>` | Remove tag(s) from a note (e.g. `s2 -t cheese`) |
 | `t <tags>` | Tag the last note created this session |
-| `b` | Browse all notes in order (rendered via batcat/less) |
+| `b` | Browse all notes in order (rendered via bat/less) |
 | `ns <name>` | New source for session (reuse existing or create via nse) |
 | `nse` | Source entry interview — MLA-ish fields with autocomplete |
 | `vs <name_or_id>` | View/export notes by source |
@@ -44,7 +44,7 @@ Everything is typed inline at the prompt. The only interactive mode is `nse` (so
 | `va <Last, First>` | View/export notes by author |
 | `stadd <name>` | Add a new source type |
 | `help` | Show all commands |
-| `exit` | Quit |
+| `exit` / `quit` | Quit |
 
 ### Autocomplete (Tab)
 
@@ -138,19 +138,19 @@ snippets> A note with no source
 Saved note #5
 
 snippets> b
-(opens all notes in batcat/less, rendered as markdown)
+(opens all notes in bat/less, rendered as markdown)
 
 snippets> vs The Republic
 Export: ./exports/source_1_the_republic.md (4 notes)
-(opens in batcat/less)
+(opens in bat/less)
 
 snippets> vt philosophy
 Export: ./exports/tag_1_philosophy.md (1 notes)
-(opens in batcat/less)
+(opens in bat/less)
 
 snippets> va Plato
 Export: ./exports/author_plato.md (4 notes)
-(opens in batcat/less)
+(opens in bat/less)
 
 snippets> exit
 Bye!
@@ -177,6 +177,7 @@ session.py     Session state (current source, note tracking)
 commands.py    Command implementations + dispatch parser
 export.py      Markdown export generation
 completers.py  prompt_toolkit completers (REPL + NSE fields)
+picker.py      Interactive snippet picker for viewing/tagging notes
 locator.py     Locator token parsing (page/time references)
 schema.sql     PostgreSQL DDL + seed data
 ```

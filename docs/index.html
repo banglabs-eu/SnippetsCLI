@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snippets CLI — Note-taking for your terminal</title>
+<style>
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #161b22; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+
+/* ─── Monospace family ─── */
+.mono, code, pre, .terminal-body, .terminal-input {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* ─── Colors ─── */
+:root {
+  --bg: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --green: #3fb950;
+  --green-dim: #238636;
+  --blue: #58a6ff;
+  --orange: #d29922;
+  --purple: #bc8cff;
+  --red: #f85149;
+  --cyan: #79c0ff;
+}
+
+/* ─── Navigation ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(13, 17, 23, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--green);
+  text-decoration: none;
+}
+.nav-brand span { color: var(--text-muted); font-weight: 400; }
+.nav-links { display: flex; gap: 24px; list-style: none; }
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active {
+  color: var(--text);
+  border-bottom-color: var(--green);
+}
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+}
+@media (max-width: 768px) {
+  .hamburger { display: block; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 60px; left: 0; right: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: 16px 24px;
+    gap: 12px;
+  }
+  .nav-links.open { display: flex; }
+}
+
+/* ─── Sections ─── */
+section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.section-subtitle {
+  color: var(--text-muted);
+  font-size: 16px;
+  margin-bottom: 40px;
+}
+
+/* ─── Fade-in animation ─── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Hero ─── */
+#hero {
+  padding-top: 120px;
+  text-align: center;
+}
+.hero-title {
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 800;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 48px;
+}
+
+/* ─── Terminal ─── */
+.terminal {
+  max-width: 780px;
+  margin: 0 auto;
+  background: #1a1b26;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+.terminal-titlebar {
+  background: var(--bg-tertiary);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.terminal-dot.red { background: #ff5f56; }
+.terminal-dot.yellow { background: #ffbd2e; }
+.terminal-dot.green { background: #27c93f; }
+.terminal-titlebar-text {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.terminal-body {
+  padding: 16px;
+  min-height: 380px;
+  max-height: 480px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.terminal-body::-webkit-scrollbar { width: 6px; }
+.terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+.terminal-line { white-space: pre-wrap; word-break: break-word; }
+.terminal-line.output { color: var(--text-muted); }
+.terminal-line.success { color: var(--green); }
+.terminal-line.info { color: var(--cyan); }
+.terminal-line.error { color: var(--red); }
+.terminal-line.accent { color: var(--orange); }
+.terminal-line.dim { color: #484f58; }
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+}
+.terminal-prompt {
+  color: var(--green);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.terminal-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  caret-color: var(--green);
+  font-family: inherit;
+}
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--green);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.terminal-click-hint {
+  text-align: center;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Features ─── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 768px) {
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .features-grid { grid-template-columns: 1fr; }
+}
+.feature-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--green-dim);
+}
+.feature-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  display: block;
+}
+.feature-card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ─── Commands ─── */
+.commands-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.commands-search {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.commands-search:focus { border-color: var(--green); }
+.commands-search::placeholder { color: var(--text-muted); }
+.filter-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: var(--text-muted); color: var(--text); }
+.filter-btn.active {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: #fff;
+}
+.commands-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .commands-grid { grid-template-columns: 1fr; }
+}
+.command-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+.command-card:hover { border-color: var(--green-dim); }
+.command-card.hidden { display: none; }
+.command-syntax {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 14px;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.command-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.command-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.command-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.badge-notes { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+.badge-sources { background: rgba(88, 166, 255, 0.15); color: var(--blue); }
+.badge-tags { background: rgba(188, 140, 255, 0.15); color: var(--purple); }
+.badge-viewing { background: rgba(210, 153, 34, 0.15); color: var(--orange); }
+.badge-system { background: rgba(139, 148, 158, 0.15); color: var(--text-muted); }
+.command-try {
+  font-size: 12px;
+  color: var(--blue);
+  cursor: pointer;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.command-try:hover { opacity: 1; text-decoration: underline; }
+
+/* ─── Schema ─── */
+.schema-container {
+  position: relative;
+  padding: 20px 0;
+}
+.schema-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+.table-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.table-card-header {
+  background: var(--bg-tertiary);
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-card-header .table-icon { color: var(--blue); }
+.table-card-fields { padding: 8px 0; }
+.table-field {
+  padding: 4px 14px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-field code {
+  font-size: 12px;
+  color: var(--text);
+}
+.field-badge {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.field-pk { background: rgba(210, 153, 34, 0.2); color: var(--orange); }
+.field-fk { background: rgba(88, 166, 255, 0.2); color: var(--blue); }
+.field-type {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: auto;
+}
+.schema-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.schema-svg line {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  stroke-dasharray: 6, 4;
+}
+
+/* ─── Architecture ─── */
+.arch-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.arch-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.arch-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-width: 160px;
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.arch-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--green-dim);
+}
+.arch-card .filename {
+  font-family: 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 14px;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.arch-card .filedesc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.arch-card .lines {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-top: 4px;
+}
+.arch-arrow {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 24px;
+  line-height: 1;
+}
+.arch-card.entry { border-color: var(--green-dim); }
+.arch-card.core { border-color: var(--blue); border-opacity: 0.4; }
+.arch-card.data { border-color: var(--orange); border-opacity: 0.4; }
+
+/* ─── Setup ─── */
+.setup-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.setup-step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.step-number {
+  width: 40px; height: 40px;
+  min-width: 40px;
+  background: var(--green-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+}
+.step-content { flex: 1; }
+.step-content h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.step-content p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.code-block {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.code-block pre {
+  padding: 14px 16px;
+  font-size: 13px;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.code-block .copy-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.code-block .copy-btn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+/* ─── Footer ─── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+footer a {
+  color: var(--blue);
+  text-decoration: none;
+}
+footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- ─── Navigation ─── -->
+<nav>
+  <a href="#hero" class="nav-brand">&gt;_ snippets<span>.cli</span></a>
+  <button class="hamburger" aria-label="Menu">&#9776;</button>
+  <ul class="nav-links">
+    <li><a href="#hero">Try It</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#schema">Schema</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#setup">Setup</a></li>
+  </ul>
+</nav>
+
+<!-- ─── Hero + Terminal ─── -->
+<section id="hero">
+  <div class="fade-in">
+    <h1 class="hero-title">Note-taking for your terminal</h1>
+    <p class="hero-subtitle">A PostgreSQL-backed REPL for capturing Markdown snippets with source citations, tags, locator references, and structured export.</p>
+  </div>
+
+  <div class="terminal fade-in" id="terminal">
+    <div class="terminal-titlebar">
+      <span class="terminal-dot red"></span>
+      <span class="terminal-dot yellow"></span>
+      <span class="terminal-dot green"></span>
+      <span class="terminal-titlebar-text">snippets-cli</span>
+    </div>
+    <div class="terminal-body" id="terminal-body">
+      <div class="terminal-line info">Snippets CLI ready. Type 'help' for commands.</div>
+      <div class="terminal-line dim"></div>
+    </div>
+    <div class="terminal-click-hint" id="terminal-hint">Click or start typing to interact</div>
+  </div>
+</section>
+
+<!-- ─── Features ─── -->
+<section id="features">
+  <h2 class="section-title fade-in">Features</h2>
+  <p class="section-subtitle fade-in">Everything you need for structured note-taking, right in your terminal.</p>
+  <div class="features-grid">
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#9889;</span>
+      <h3>Instant Capture</h3>
+      <p>Just type text at the prompt &mdash; any unrecognized input becomes a note. No commands to memorize for basic note-taking.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#128218;</span>
+      <h3>Source Citations</h3>
+      <p>Link notes to bibliographic sources with MLA-style citations, authors, publishers, and edition tracking.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#127991;</span>
+      <h3>Smart Tagging</h3>
+      <p>Tag notes with comma-separated labels. Autocomplete helps you reuse existing tags. Add or remove tags from any note.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#128278;</span>
+      <h3>Locator Tokens</h3>
+      <p>Append <code>p32</code> or <code>t1:23:45</code> to notes to automatically parse page and time references into structured metadata.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#128196;</span>
+      <h3>Markdown Export</h3>
+      <p>Export notes by source, tag, or author as formatted Markdown files. View inline with bat or less.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <span class="feature-icon">&#8677;</span>
+      <h3>Tab Completion</h3>
+      <p>Context-aware autocomplete for sources, tags, authors, and more. The REPL knows what you need.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Commands ─── -->
+<section id="commands">
+  <h2 class="section-title fade-in">Command Reference</h2>
+  <p class="section-subtitle fade-in">Every command available in the REPL. Click an example to try it in the terminal.</p>
+
+  <div class="commands-toolbar fade-in">
+    <input type="text" class="commands-search" id="commands-search" placeholder="Search commands...">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="notes">Notes</button>
+    <button class="filter-btn" data-filter="sources">Sources</button>
+    <button class="filter-btn" data-filter="tags">Tags</button>
+    <button class="filter-btn" data-filter="viewing">Viewing</button>
+    <button class="filter-btn" data-filter="system">System</button>
+  </div>
+
+  <div class="commands-grid" id="commands-grid">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- ─── Schema ─── -->
+<section id="schema">
+  <h2 class="section-title fade-in">Database Schema</h2>
+  <p class="section-subtitle fade-in">Seven PostgreSQL tables for notes, sources, authors, publishers, tags, and metadata.</p>
+  <div class="schema-container fade-in" id="schema-container">
+    <svg class="schema-svg" id="schema-svg"></svg>
+    <div class="schema-grid" id="schema-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ─── Architecture ─── -->
+<section id="architecture">
+  <h2 class="section-title fade-in">Architecture</h2>
+  <p class="section-subtitle fade-in">Nine files, ~1,650 lines. Simple, linear data flow.</p>
+  <div class="arch-flow fade-in">
+    <div class="arch-row">
+      <div class="arch-card entry">
+        <div class="filename">main.py</div>
+        <div class="filedesc">REPL entry point</div>
+        <div class="lines">54 lines</div>
+      </div>
+    </div>
+    <div class="arch-arrow">&darr;</div>
+    <div class="arch-row">
+      <div class="arch-card core">
+        <div class="filename">commands.py</div>
+        <div class="filedesc">Command dispatch + logic</div>
+        <div class="lines">474 lines</div>
+      </div>
+    </div>
+    <div class="arch-arrow">&darr;</div>
+    <div class="arch-row">
+      <div class="arch-card data">
+        <div class="filename">db.py</div>
+        <div class="filedesc">Data access layer (SQL)</div>
+        <div class="lines">487 lines</div>
+      </div>
+      <div class="arch-card">
+        <div class="filename">export.py</div>
+        <div class="filedesc">Markdown export</div>
+        <div class="lines">155 lines</div>
+      </div>
+      <div class="arch-card">
+        <div class="filename">locator.py</div>
+        <div class="filedesc">Page/time parsing</div>
+        <div class="lines">43 lines</div>
+      </div>
+      <div class="arch-card">
+        <div class="filename">session.py</div>
+        <div class="filedesc">Session state</div>
+        <div class="lines">12 lines</div>
+      </div>
+    </div>
+    <div class="arch-arrow">&darr;</div>
+    <div class="arch-row">
+      <div class="arch-card">
+        <div class="filename">picker.py</div>
+        <div class="filedesc">Interactive note picker</div>
+        <div class="lines">120 lines</div>
+      </div>
+      <div class="arch-card">
+        <div class="filename">completers.py</div>
+        <div class="filedesc">Tab completers</div>
+        <div class="lines">224 lines</div>
+      </div>
+      <div class="arch-card data">
+        <div class="filename">schema.sql</div>
+        <div class="filedesc">PostgreSQL DDL + seeds</div>
+        <div class="lines">76 lines</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Setup ─── -->
+<section id="setup">
+  <h2 class="section-title fade-in">Getting Started</h2>
+  <p class="section-subtitle fade-in">Three steps to start taking notes.</p>
+  <div class="setup-steps fade-in">
+
+    <div class="setup-step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h3>Clone &amp; Install</h3>
+        <p>Clone the repository and install Python dependencies in a virtual environment.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy="clone-install">Copy</button>
+          <pre id="clone-install">git clone https://github.com/yourusername/snippets-cli.git
+cd snippets-cli
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h3>Configure Environment</h3>
+        <p>Copy <code>.env.example</code> to <code>.env</code> and set your PostgreSQL connection string.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy="env-config">Copy</button>
+          <pre id="env-config">cp .env.example .env
+
+# Edit .env with your database credentials:
+DATABASE_URL=postgresql://user:password@host:port/dbname
+EXPORT_DIR=./exports</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h3>Run</h3>
+        <p>Launch the REPL. The schema is created automatically on first run.</p>
+        <div class="code-block">
+          <button class="copy-btn" data-copy="run-cmd">Copy</button>
+          <pre id="run-cmd">python main.py</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── Footer ─── -->
+<footer>
+  <p>MIT License &copy; 2026 Adam Bang Kjems</p>
+  <p style="margin-top: 8px;">
+    <a href="https://github.com/yourusername/snippets-cli">GitHub</a>
+  </p>
+</footer>
+
+<!-- ─── JavaScript ─── -->
+<script>
+(function() {
+'use strict';
+
+/* ═══════════════════════════════════════════
+   COMMANDS DATA
+   ═══════════════════════════════════════════ */
+const COMMANDS = [
+  { syntax: '<text>', desc: 'Just type — any unrecognized input is saved as a note', category: 'notes', example: 'Knowledge is justified true belief p42' },
+  { syntax: 's <name_or_id>', desc: 'Set session source (Tab to autocomplete)', category: 'sources', example: 's The Republic' },
+  { syntax: 's', desc: 'Show current source and citation', category: 'sources', example: 's' },
+  { syntax: 's clear', desc: 'Unset source — future notes have no source', category: 'sources', example: 's clear' },
+  { syntax: 's<id> +t <tags>', desc: 'Add tag(s) to a note by ID', category: 'tags', example: 's1 +t ancient, plato' },
+  { syntax: 's<id> -t <tags>', desc: 'Remove tag(s) from a note by ID', category: 'tags', example: 's2 -t cheese' },
+  { syntax: 't <tags>', desc: 'Tag the last note created this session', category: 'tags', example: 't philosophy, epistemology' },
+  { syntax: 'ns <name>', desc: 'New source for session (reuse or create)', category: 'sources', example: 'ns The Republic' },
+  { syntax: 'nse', desc: 'Source entry interview — MLA-ish fields', category: 'sources', example: 'nse' },
+  { syntax: 'vs <name_or_id>', desc: 'View/export notes by source', category: 'viewing', example: 'vs The Republic' },
+  { syntax: 'vt <tag>', desc: 'View/export notes by tag', category: 'viewing', example: 'vt philosophy' },
+  { syntax: 'va <Last, First>', desc: 'View/export notes by author', category: 'viewing', example: 'va Plato' },
+  { syntax: 'b', desc: 'Browse all notes (rendered Markdown)', category: 'viewing', example: 'b' },
+  { syntax: 'stadd <name>', desc: 'Add a new source type', category: 'system', example: 'stadd Podcast' },
+  { syntax: 'help', desc: 'Show all available commands', category: 'system', example: 'help' },
+  { syntax: 'exit', desc: 'Quit the REPL', category: 'system', example: 'exit' },
+];
+
+const CATEGORY_LABELS = {
+  notes: 'Notes', sources: 'Sources', tags: 'Tags', viewing: 'Viewing', system: 'System'
+};
+const CATEGORY_BADGE = {
+  notes: 'badge-notes', sources: 'badge-sources', tags: 'badge-tags', viewing: 'badge-viewing', system: 'badge-system'
+};
+
+/* ═══════════════════════════════════════════
+   SCHEMA DATA
+   ═══════════════════════════════════════════ */
+const SCHEMA_TABLES = [
+  {
+    name: 'notes', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'body', type: 'TEXT' },
+      { name: 'source_id', type: 'INTEGER', fk: 'sources' },
+      { name: 'locator_type', type: 'TEXT' },
+      { name: 'locator_value', type: 'TEXT' },
+      { name: 'created_at', type: 'TIMESTAMP' },
+    ]
+  },
+  {
+    name: 'sources', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'name', type: 'TEXT' },
+      { name: 'source_type_id', type: 'INTEGER', fk: 'source_types' },
+      { name: 'year', type: 'TEXT' },
+      { name: 'url', type: 'TEXT' },
+      { name: 'accessed_date', type: 'TEXT' },
+      { name: 'edition', type: 'TEXT' },
+      { name: 'pages', type: 'TEXT' },
+      { name: 'extra_notes', type: 'TEXT' },
+      { name: 'publisher_id', type: 'INTEGER', fk: 'source_publishers' },
+      { name: 'created_at', type: 'TIMESTAMP' },
+    ]
+  },
+  {
+    name: 'source_types', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'name', type: 'TEXT' },
+    ]
+  },
+  {
+    name: 'source_authors', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'source_id', type: 'INTEGER', fk: 'sources' },
+      { name: 'first_name', type: 'TEXT' },
+      { name: 'last_name', type: 'TEXT' },
+      { name: 'author_order', type: 'INTEGER' },
+    ]
+  },
+  {
+    name: 'source_publishers', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'name', type: 'TEXT' },
+      { name: 'city', type: 'TEXT' },
+    ]
+  },
+  {
+    name: 'tags', fields: [
+      { name: 'id', type: 'SERIAL', pk: true },
+      { name: 'name', type: 'TEXT' },
+    ]
+  },
+  {
+    name: 'note_tags', fields: [
+      { name: 'note_id', type: 'INTEGER', fk: 'notes', pk: true },
+      { name: 'tag_id', type: 'INTEGER', fk: 'tags', pk: true },
+    ]
+  },
+];
+
+/* ═══════════════════════════════════════════
+   TERMINAL SIMULATOR
+   ═══════════════════════════════════════════ */
+class TerminalSimulator {
+  constructor(bodyEl, hintEl) {
+    this.body = bodyEl;
+    this.hint = hintEl;
+    this.history = [];
+    this.historyIndex = -1;
+    this.notes = [];
+    this.sources = [];
+    this.sourceTypes = [
+      { id: 1, name: 'Book' },
+      { id: 2, name: 'Article' },
+      { id: 3, name: 'Magazine' },
+      { id: 4, name: 'YouTube Video' },
+      { id: 5, name: 'Other' },
+    ];
+    this.publishers = [];
+    this.tags = [];
+    this.noteTags = {};
+    this.authors = [];
+    this.currentSourceId = null;
+    this.sessionNoteIds = [];
+    this.lastNoteId = null;
+    this.nextNoteId = 1;
+    this.nextSourceId = 1;
+    this.nextTagId = 1;
+    this.nextPublisherId = 1;
+    this.nextAuthorId = 1;
+
+    // nse interview state machine
+    this.interviewMode = null; // null or { step, data }
+
+    // Demo state
+    this.demoRunning = false;
+    this.demoStopped = false;
+    this.inputEl = null;
+
+    this._createInputLine();
+  }
+
+  get promptText() {
+    if (this.interviewMode) return '';
+    if (this.currentSourceId) {
+      const src = this.sources.find(s => s.id === this.currentSourceId);
+      return `snippets [${src ? src.name : '?'}]> `;
+    }
+    return 'snippets> ';
+  }
+
+  _createInputLine() {
+    // Remove existing input line
+    const existing = this.body.querySelector('.terminal-input-line');
+    if (existing) existing.remove();
+
+    const line = document.createElement('div');
+    line.className = 'terminal-input-line';
+
+    const prompt = document.createElement('span');
+    prompt.className = 'terminal-prompt mono';
+    prompt.textContent = this.promptText;
+    line.appendChild(prompt);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'terminal-input mono';
+    input.spellcheck = false;
+    input.autocomplete = 'off';
+    line.appendChild(input);
+
+    this.body.appendChild(line);
+    this.inputEl = input;
+
+    input.addEventListener('keydown', (e) => this._onKey(e));
+  }
+
+  _scrollToBottom() {
+    this.body.scrollTop = this.body.scrollHeight;
+  }
+
+  _addLine(text, cls = '') {
+    const div = document.createElement('div');
+    div.className = 'terminal-line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    // Insert before input line
+    const inputLine = this.body.querySelector('.terminal-input-line');
+    this.body.insertBefore(div, inputLine);
+    this._scrollToBottom();
+  }
+
+  _addLines(lines, cls = '') {
+    lines.forEach(l => this._addLine(l, cls));
+  }
+
+  _onKey(e) {
+    if (e.key === 'Enter') {
+      const val = this.inputEl.value;
+      this._submitCommand(val);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (this.history.length > 0) {
+        if (this.historyIndex < this.history.length - 1) {
+          this.historyIndex++;
+          this.inputEl.value = this.history[this.history.length - 1 - this.historyIndex];
+        }
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (this.historyIndex > 0) {
+        this.historyIndex--;
+        this.inputEl.value = this.history[this.history.length - 1 - this.historyIndex];
+      } else {
+        this.historyIndex = -1;
+        this.inputEl.value = '';
+      }
+    }
+  }
+
+  _submitCommand(val) {
+    const prompt = this.promptText;
+    this._addLine(prompt + val);
+    this.inputEl.value = '';
+    this.historyIndex = -1;
+    if (val.trim()) this.history.push(val.trim());
+
+    if (this.interviewMode) {
+      this._handleInterview(val.trim());
+    } else {
+      this._dispatch(val.trim());
+    }
+    this._refreshPrompt();
+    this._scrollToBottom();
+    this.inputEl.focus();
+  }
+
+  _refreshPrompt() {
+    const promptEl = this.body.querySelector('.terminal-input-line .terminal-prompt');
+    if (promptEl) promptEl.textContent = this.promptText;
+  }
+
+  focus() {
+    if (this.inputEl) this.inputEl.focus();
+  }
+
+  /* ─── Locator Parser (ported from locator.py) ─── */
+  _parseLocator(text) {
+    const trimmed = text.trimEnd();
+    // Time: t00:00 or t01:02:03
+    const timeRe = /\s+(t\d{1,2}:\d{2}(?::\d{2})?)\s*$/i;
+    let m = timeRe.exec(trimmed);
+    if (m) {
+      const token = m[1];
+      const body = trimmed.slice(0, m.index).trimEnd();
+      return { body, type: 'time', value: token.slice(1) };
+    }
+    // Page: p32, p.32, pp. 32-35
+    const pageRe = /\s+(pp?\.?\s*\d+(?:\s*-\s*\d+)?)\s*$/i;
+    m = pageRe.exec(trimmed);
+    if (m) {
+      const token = m[1];
+      const body = trimmed.slice(0, m.index).trimEnd();
+      const value = token.replace(/^pp?\.?\s*/i, '').trim();
+      return { body, type: 'page', value };
+    }
+    return { body: text, type: null, value: null };
+  }
+
+  /* ─── Citation Builder (ported from db.py) ─── */
+  _buildCitation(sourceId) {
+    const src = this.sources.find(s => s.id === sourceId);
+    if (!src) return '';
+    const parts = [];
+    const auths = this.authors.filter(a => a.source_id === sourceId).sort((a, b) => a.author_order - b.author_order);
+    if (auths.length) {
+      const strs = auths.map(a => {
+        if (a.last_name && a.first_name) return `${a.last_name}, ${a.first_name}`;
+        return a.last_name || a.first_name || '';
+      }).filter(Boolean);
+      if (strs.length === 1) parts.push(strs[0] + '.');
+      else if (strs.length === 2) parts.push(`${strs[0]}, and ${strs[1]}.`);
+      else if (strs.length > 2) parts.push(`${strs[0]}, et al.`);
+    }
+    parts.push(`*${src.name}*.`);
+    if (src.source_type_id) {
+      const st = this.sourceTypes.find(t => t.id === src.source_type_id);
+      if (st) parts.push(st.name + '.');
+    }
+    if (src.edition) parts.push(`${src.edition} ed.`);
+    if (src.publisher_id) {
+      const pub = this.publishers.find(p => p.id === src.publisher_id);
+      if (pub) {
+        let ps = pub.name;
+        if (pub.city) ps = `${pub.city}: ${ps}`;
+        parts.push(ps + ',');
+      }
+    }
+    if (src.year) parts.push(`${src.year}.`);
+    if (src.pages) parts.push(`pp. ${src.pages}.`);
+    if (src.url) parts.push(src.url + '.');
+    if (src.accessed_date) parts.push(`Accessed ${src.accessed_date}.`);
+    return parts.join(' ');
+  }
+
+  /* ─── Command Dispatch ─── */
+  _dispatch(input) {
+    if (!input) return;
+    const upper = input.toUpperCase();
+
+    if (upper === 'EXIT' || upper === 'QUIT') {
+      this._addLine('Bye!', 'success');
+      return;
+    }
+    if (upper === 'HELP') return this._cmdHelp();
+    if (upper === 'B' || upper === 'BROWSE') return this._cmdBrowse();
+    if (upper === 'NSE') return this._cmdNse();
+
+    // s<id> +t / -t
+    const tagRe = /^s(\d+)\s+([+-]t)\s+(.+)$/i;
+    const tm = tagRe.exec(input);
+    if (tm) {
+      const noteId = parseInt(tm[1]);
+      const op = tm[2].toLowerCase();
+      const tags = tm[3];
+      if (op === '+t') return this._cmdNoteAddTags(noteId, tags);
+      else return this._cmdNoteRemoveTags(noteId, tags);
+    }
+
+    const parts = input.split(/\s+(.+)/);
+    const prefix = parts[0].toUpperCase();
+    const arg = parts[1] || '';
+
+    if (prefix === 'S') return this._cmdS(arg);
+    if (prefix === 'T') return this._cmdT(arg);
+    if (prefix === 'NS') return this._cmdNs(arg);
+    if (prefix === 'VS') return this._cmdVs(arg);
+    if (prefix === 'VT') return this._cmdVt(arg);
+    if (prefix === 'VA') return this._cmdVa(arg);
+    if (prefix === 'STADD') return this._cmdStadd(arg);
+
+    // Default: create note
+    this._cmdNote(input);
+  }
+
+  _cmdHelp() {
+    const lines = [
+      '',
+      'Commands:',
+      '  <text>             Just type — saved as a note',
+      '  s <name_or_id>     Set session source',
+      '  s clear            Unset source',
+      '  s<id> +t <tags>    Add tag(s) to note',
+      '  s<id> -t <tags>    Remove tag(s) from note',
+      '  t <tags>           Tag the last note',
+      '  b                  Browse all notes',
+      '  ns <name>          New source for session',
+      '  nse                Source entry interview',
+      '  vs <name_or_id>    View/export notes by source',
+      '  vt <tag>           View/export notes by tag',
+      '  va <Last, First>   View/export notes by author',
+      '  stadd <name>       Add a new source type',
+      '  help               Show this help',
+      '  exit               Quit',
+      '',
+      'Locator tokens (append to end of note):',
+      '  p32       Page 32        pp. 10-15   Pages 10-15',
+      '  t1:23:45  Time 1:23:45',
+      '',
+    ];
+    this._addLines(lines, 'output');
+  }
+
+  _cmdNote(text) {
+    if (!text.trim()) return;
+    const { body, type, value } = this._parseLocator(text);
+    const id = this.nextNoteId++;
+    this.notes.push({ id, body, source_id: this.currentSourceId, locator_type: type, locator_value: value });
+    this.sessionNoteIds.push(id);
+    this.lastNoteId = id;
+
+    const p = [`Saved note #${id}`];
+    if (this.currentSourceId) {
+      const src = this.sources.find(s => s.id === this.currentSourceId);
+      if (src) p.push(`linked to "${src.name}"`);
+    }
+    if (type) p.push(`${type}=${value}`);
+    this._addLine(p.join(' | '), 'success');
+  }
+
+  _resolveSource(arg) {
+    if (/^\d+$/.test(arg)) {
+      const s = this.sources.find(s => s.id === parseInt(arg));
+      return s ? s.id : null;
+    }
+    const exact = this.sources.find(s => s.name.toLowerCase() === arg.toLowerCase());
+    if (exact) return exact.id;
+    const partial = this.sources.find(s => s.name.toLowerCase().includes(arg.toLowerCase()));
+    return partial ? partial.id : null;
+  }
+
+  _cmdS(arg) {
+    arg = arg.trim();
+    if (!arg) {
+      if (this.currentSourceId) {
+        const src = this.sources.find(s => s.id === this.currentSourceId);
+        if (src) {
+          const citation = this._buildCitation(this.currentSourceId);
+          this._addLine(`Current source: "${src.name}" (id:${src.id})`, 'info');
+          if (citation) this._addLine('  ' + citation, 'output');
+          return;
+        }
+      }
+      this._addLine('No source set. Use: s <name_or_id>', 'output');
+      return;
+    }
+    if (arg.toLowerCase() === 'clear' || arg.toLowerCase() === 'none') {
+      this.currentSourceId = null;
+      this._addLine('Source cleared. Future notes will have no source.', 'output');
+      return;
+    }
+    const id = this._resolveSource(arg);
+    if (id === null) {
+      this._addLine(`Source "${arg}" not found. Use ns <name> to create one.`, 'error');
+      return;
+    }
+    this.currentSourceId = id;
+    const src = this.sources.find(s => s.id === id);
+    this._addLine(`Source set: "${src.name}" (id:${id})`, 'success');
+
+    // Link sourceless session notes
+    const sourceless = this.sessionNoteIds.filter(nid => {
+      const n = this.notes.find(nn => nn.id === nid);
+      return n && !n.source_id;
+    });
+    if (sourceless.length) {
+      sourceless.forEach(nid => {
+        const n = this.notes.find(nn => nn.id === nid);
+        if (n) n.source_id = id;
+      });
+      this._addLine(`Linked ${sourceless.length} previous session note(s).`, 'info');
+    }
+  }
+
+  _cmdT(tagsStr) {
+    if (!this.lastNoteId) {
+      this._addLine('No note created this session yet.', 'error');
+      return;
+    }
+    this._cmdNoteAddTags(this.lastNoteId, tagsStr);
+  }
+
+  _cmdNoteAddTags(noteId, tagsStr) {
+    const note = this.notes.find(n => n.id === noteId);
+    if (!note) {
+      this._addLine(`Note #${noteId} not found.`, 'error');
+      return;
+    }
+    const names = tagsStr.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    if (!names.length) {
+      this._addLine('No tags specified.', 'error');
+      return;
+    }
+    names.forEach(name => {
+      let tag = this.tags.find(t => t.name === name);
+      if (!tag) {
+        tag = { id: this.nextTagId++, name };
+        this.tags.push(tag);
+      }
+      if (!this.noteTags[noteId]) this.noteTags[noteId] = [];
+      if (!this.noteTags[noteId].includes(tag.id)) this.noteTags[noteId].push(tag.id);
+    });
+    this._addLine(`#${noteId} +t ${names.join(', ')}`, 'success');
+  }
+
+  _cmdNoteRemoveTags(noteId, tagsStr) {
+    const note = this.notes.find(n => n.id === noteId);
+    if (!note) {
+      this._addLine(`Note #${noteId} not found.`, 'error');
+      return;
+    }
+    const names = tagsStr.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    const removed = [];
+    names.forEach(name => {
+      const tag = this.tags.find(t => t.name === name);
+      if (tag && this.noteTags[noteId]) {
+        this.noteTags[noteId] = this.noteTags[noteId].filter(id => id !== tag.id);
+        removed.push(name);
+      } else {
+        this._addLine(`Tag '${name}' not found.`, 'error');
+      }
+    });
+    if (removed.length) this._addLine(`#${noteId} -t ${removed.join(', ')}`, 'success');
+  }
+
+  _cmdBrowse() {
+    if (!this.notes.length) {
+      this._addLine('No notes yet.', 'output');
+      return;
+    }
+    this._addLine('', '');
+    this.notes.forEach(n => {
+      let line = `  #${n.id}: ${n.body}`;
+      if (n.locator_type) line += ` [${n.locator_type}=${n.locator_value}]`;
+      if (n.source_id) {
+        const src = this.sources.find(s => s.id === n.source_id);
+        if (src) line += ` (${src.name})`;
+      }
+      const tagIds = this.noteTags[n.id] || [];
+      if (tagIds.length) {
+        const tagNames = tagIds.map(tid => this.tags.find(t => t.id === tid)).filter(Boolean).map(t => t.name);
+        if (tagNames.length) line += ` [${tagNames.join(', ')}]`;
+      }
+      this._addLine(line, 'output');
+    });
+    this._addLine(`(${this.notes.length} notes)`, 'dim');
+    this._addLine('', '');
+  }
+
+  _cmdNs(arg) {
+    const name = arg.trim();
+    if (!name) {
+      this._addLine('Usage: ns <source_name>', 'error');
+      return;
+    }
+    const existing = this._resolveSource(name);
+    if (existing) {
+      this.currentSourceId = existing;
+      const src = this.sources.find(s => s.id === existing);
+      this._addLine(`Source set: "${src.name}" (id:${existing})`, 'success');
+      return;
+    }
+    // Start nse interview with prefilled name
+    this._startInterview(name);
+  }
+
+  _cmdNse() {
+    this._startInterview(null);
+  }
+
+  /* ─── NSE Interview State Machine ─── */
+  _startInterview(prefilledName) {
+    this._addLine('=== Source Entry Interview ===', 'accent');
+    const data = {
+      name: null, source_type_id: null, year: null, url: null,
+      accessed_date: null, edition: null, pages: null, extra_notes: null,
+      publisher_name: null, publisher_city: null, publisher_id: null,
+      authors: [],
+    };
+
+    if (prefilledName) {
+      data.name = prefilledName;
+      this._addLine(`Source title: ${prefilledName}`, 'output');
+      // Show types and go to type step
+      this._showSourceTypes();
+      this.interviewMode = { step: 'type', data };
+    } else {
+      this.interviewMode = { step: 'title', data };
+      this._setInterviewPrompt('Source title: ');
+    }
+  }
+
+  _showSourceTypes() {
+    this._addLine('Source types:', 'output');
+    this.sourceTypes.forEach(t => {
+      this._addLine(`  ${t.id}. ${t.name}`, 'output');
+    });
+    this._setInterviewPrompt('Source type (name or #, Enter to skip): ');
+  }
+
+  _setInterviewPrompt(text) {
+    const promptEl = this.body.querySelector('.terminal-input-line .terminal-prompt');
+    if (promptEl) promptEl.textContent = text;
+  }
+
+  _handleInterview(val) {
+    const im = this.interviewMode;
+    if (!im) return;
+    const d = im.data;
+
+    switch (im.step) {
+      case 'title':
+        if (!val) { this._addLine('Cancelled.', 'output'); this.interviewMode = null; return; }
+        d.name = val;
+        this._showSourceTypes();
+        im.step = 'type';
+        break;
+
+      case 'type':
+        if (val) {
+          if (/^\d+$/.test(val)) {
+            const st = this.sourceTypes.find(t => t.id === parseInt(val));
+            if (st) d.source_type_id = st.id;
+          } else {
+            const st = this.sourceTypes.find(t => t.name.toLowerCase() === val.toLowerCase());
+            if (st) d.source_type_id = st.id;
+          }
+        }
+        im.step = 'year';
+        this._setInterviewPrompt('Year/date (Enter to skip): ');
+        break;
+
+      case 'year':
+        d.year = val || null;
+        im.step = 'url';
+        this._setInterviewPrompt('URL (Enter to skip): ');
+        break;
+
+      case 'url':
+        d.url = val || null;
+        im.step = 'accessed_date';
+        this._setInterviewPrompt('Accessed date (Enter to skip): ');
+        break;
+
+      case 'accessed_date':
+        d.accessed_date = val || null;
+        im.step = 'edition';
+        this._setInterviewPrompt('Edition (Enter to skip): ');
+        break;
+
+      case 'edition':
+        d.edition = val || null;
+        im.step = 'pages';
+        this._setInterviewPrompt('Pages (range) (Enter to skip): ');
+        break;
+
+      case 'pages':
+        d.pages = val || null;
+        im.step = 'extra_notes';
+        this._setInterviewPrompt('Extra notes (Enter to skip): ');
+        break;
+
+      case 'extra_notes':
+        d.extra_notes = val || null;
+        im.step = 'publisher_name';
+        this._setInterviewPrompt('Publisher name (Enter to skip): ');
+        break;
+
+      case 'publisher_name':
+        d.publisher_name = val || null;
+        if (val) {
+          im.step = 'publisher_city';
+          this._setInterviewPrompt('Publisher city (Enter to skip): ');
+        } else {
+          this._finishSourceCreation(d);
+        }
+        break;
+
+      case 'publisher_city':
+        d.publisher_city = val || null;
+        this._finishSourceCreation(d);
+        break;
+
+      case 'author_last':
+        if (!val) {
+          this._finishAuthors(d);
+          return;
+        }
+        d._currentAuthorLast = val;
+        im.step = 'author_first';
+        this._setInterviewPrompt(`  Author ${d.authors.length + 1} first name: `);
+        break;
+
+      case 'author_first':
+        d.authors.push({
+          last_name: d._currentAuthorLast,
+          first_name: val || '',
+          author_order: d.authors.length,
+        });
+        const last = d.authors[d.authors.length - 1];
+        this._addLine(`    Added: ${last.last_name}, ${last.first_name}`, 'success');
+        im.step = 'author_last';
+        this._setInterviewPrompt(`  Author ${d.authors.length + 1} last name: `);
+        break;
+    }
+  }
+
+  _finishSourceCreation(d) {
+    // Create publisher if needed
+    if (d.publisher_name) {
+      const pub = { id: this.nextPublisherId++, name: d.publisher_name, city: d.publisher_city };
+      this.publishers.push(pub);
+      d.publisher_id = pub.id;
+    }
+
+    // Create source
+    const srcId = this.nextSourceId++;
+    this.sources.push({
+      id: srcId, name: d.name,
+      source_type_id: d.source_type_id,
+      year: d.year, url: d.url,
+      accessed_date: d.accessed_date,
+      edition: d.edition, pages: d.pages,
+      extra_notes: d.extra_notes,
+      publisher_id: d.publisher_id,
+    });
+    d._sourceId = srcId;
+    this._addLine(`Source created: #${srcId} - ${d.name}`, 'success');
+
+    // Move to authors
+    this._addLine('Add authors (empty last name to stop):', 'output');
+    this.interviewMode.step = 'author_last';
+    this._setInterviewPrompt(`  Author 1 last name: `);
+  }
+
+  _finishAuthors(d) {
+    const srcId = d._sourceId;
+    // Save authors
+    d.authors.forEach(a => {
+      this.authors.push({
+        id: this.nextAuthorId++,
+        source_id: srcId,
+        first_name: a.first_name,
+        last_name: a.last_name,
+        author_order: a.author_order,
+      });
+    });
+
+    const citation = this._buildCitation(srcId);
+    if (citation) this._addLine('Citation: ' + citation, 'info');
+
+    this.currentSourceId = srcId;
+    this._addLine(`Source set: id:${srcId}`, 'success');
+    this.interviewMode = null;
+  }
+
+  _cmdVs(arg) {
+    arg = arg.trim();
+    if (!arg) { this._addLine('Usage: vs <source_name_or_id>', 'error'); return; }
+    const id = this._resolveSource(arg);
+    if (id === null) { this._addLine(`Source "${arg}" not found.`, 'error'); return; }
+    const src = this.sources.find(s => s.id === id);
+    const srcNotes = this.notes.filter(n => n.source_id === id);
+    this._addLine(`Export: ./exports/source_${id}_${src.name.toLowerCase().replace(/\s+/g, '_')}.md (${srcNotes.length} notes)`, 'info');
+    if (srcNotes.length) {
+      srcNotes.forEach(n => {
+        let line = `  #${n.id}: ${n.body}`;
+        if (n.locator_type) line += ` [${n.locator_type}=${n.locator_value}]`;
+        this._addLine(line, 'output');
+      });
+    }
+  }
+
+  _cmdVt(arg) {
+    arg = arg.trim();
+    if (!arg) { this._addLine('Usage: vt <tag_name>', 'error'); return; }
+    const tag = this.tags.find(t => t.name === arg.toLowerCase());
+    if (!tag) { this._addLine(`Tag "${arg}" not found.`, 'error'); return; }
+    const taggedIds = Object.entries(this.noteTags)
+      .filter(([, tids]) => tids.includes(tag.id))
+      .map(([nid]) => parseInt(nid));
+    const taggedNotes = this.notes.filter(n => taggedIds.includes(n.id));
+    this._addLine(`Export: ./exports/tag_${tag.id}_${tag.name}.md (${taggedNotes.length} notes)`, 'info');
+    taggedNotes.forEach(n => {
+      this._addLine(`  #${n.id}: ${n.body}`, 'output');
+    });
+  }
+
+  _cmdVa(arg) {
+    arg = arg.trim();
+    if (!arg) { this._addLine('Usage: va <Last, First>', 'error'); return; }
+    let authorLast, authorFirst = '';
+    if (arg.includes(',')) {
+      const parts = arg.split(',', 2);
+      authorLast = parts[0].trim();
+      authorFirst = parts[1].trim();
+    } else {
+      authorLast = arg;
+    }
+    const matchAuthors = this.authors.filter(a =>
+      a.last_name.toLowerCase() === authorLast.toLowerCase() &&
+      (!authorFirst || a.first_name.toLowerCase() === authorFirst.toLowerCase())
+    );
+    const sourceIds = [...new Set(matchAuthors.map(a => a.source_id))];
+    const authorNotes = this.notes.filter(n => sourceIds.includes(n.source_id));
+    this._addLine(`Export: ./exports/author_${authorLast.toLowerCase()}.md (${authorNotes.length} notes)`, 'info');
+    authorNotes.forEach(n => {
+      this._addLine(`  #${n.id}: ${n.body}`, 'output');
+    });
+  }
+
+  _cmdStadd(arg) {
+    const name = arg.trim();
+    if (!name) { this._addLine('Usage: stadd <type_name>', 'error'); return; }
+    if (this.sourceTypes.find(t => t.name.toLowerCase() === name.toLowerCase())) {
+      this._addLine(`Source type '${name}' already exists.`, 'error');
+      return;
+    }
+    const id = this.sourceTypes.length + 1;
+    this.sourceTypes.push({ id, name });
+    this._addLine(`Source type created: #${id} - ${name}`, 'success');
+  }
+
+  /* ─── Auto-Demo ─── */
+  async runDemo() {
+    this.demoRunning = true;
+    this.demoStopped = false;
+
+    const demoScript = [
+      { cmd: 'Knowledge is justified true belief p42', delay: 600 },
+      { cmd: 'The cave allegory suggests we perceive shadows p514', delay: 600 },
+      { cmd: 't philosophy, epistemology', delay: 500 },
+      { cmd: 's1 +t ancient, plato', delay: 500 },
+      { cmd: 'ns The Republic', delay: 400 },
+      // nse interview answers:
+      { cmd: '1', delay: 300 },          // type: Book
+      { cmd: '380 BCE', delay: 300 },    // year
+      { cmd: '', delay: 200 },           // url skip
+      { cmd: '', delay: 200 },           // accessed skip
+      { cmd: 'Revised', delay: 300 },    // edition
+      { cmd: '', delay: 200 },           // pages skip
+      { cmd: '', delay: 200 },           // extra notes skip
+      { cmd: 'Penguin Classics', delay: 300 }, // publisher
+      { cmd: 'London', delay: 300 },     // city
+      { cmd: 'Plato', delay: 300 },      // author 1 last
+      { cmd: '', delay: 200 },           // author 1 first (empty)
+      { cmd: '', delay: 200 },           // author 2 last (done)
+      // Continue with normal commands
+      { cmd: 's The Republic', delay: 500 },
+      { cmd: 'Philosopher kings must rule pp. 10-15', delay: 600 },
+      { cmd: 'Interesting discussion of Book VII t0:32', delay: 600 },
+      { cmd: 't political-theory', delay: 400 },
+      { cmd: 's', delay: 400 },
+      { cmd: 's clear', delay: 400 },
+      { cmd: 'A note with no source', delay: 500 },
+      { cmd: 'vs The Republic', delay: 500 },
+      { cmd: 'vt philosophy', delay: 500 },
+      { cmd: 'va Plato', delay: 500 },
+    ];
+
+    for (const step of demoScript) {
+      if (this.demoStopped) break;
+      await this._typeText(step.cmd, 30);
+      if (this.demoStopped) break;
+      await this._wait(step.delay);
+      if (this.demoStopped) break;
+      this._submitCommand(step.cmd);
+      await this._wait(250);
+    }
+
+    this.demoRunning = false;
+  }
+
+  _wait(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  async _typeText(text, charDelay) {
+    for (let i = 0; i < text.length; i++) {
+      if (this.demoStopped) {
+        this.inputEl.value = '';
+        return;
+      }
+      this.inputEl.value += text[i];
+      await this._wait(charDelay);
+    }
+  }
+
+  stopDemo() {
+    this.demoStopped = true;
+    this.demoRunning = false;
+    this.inputEl.value = '';
+    // If in interview mode during demo stop, exit it
+    if (this.interviewMode) {
+      this.interviewMode = null;
+      this._refreshPrompt();
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════ */
+const bodyEl = document.getElementById('terminal-body');
+const hintEl = document.getElementById('terminal-hint');
+const terminal = new TerminalSimulator(bodyEl, hintEl);
+
+// Stop demo on interaction
+let userInteracted = false;
+function onUserInteract() {
+  if (!userInteracted) {
+    userInteracted = true;
+    terminal.stopDemo();
+    hintEl.style.display = 'none';
+  }
+  terminal.focus();
+}
+
+document.getElementById('terminal').addEventListener('click', onUserInteract);
+document.addEventListener('keydown', function(e) {
+  // Only capture typing keys, not modifiers
+  if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Enter') {
+    // If we're near the terminal section, interact
+    const termRect = document.getElementById('terminal').getBoundingClientRect();
+    if (termRect.top < window.innerHeight && termRect.bottom > 0) {
+      onUserInteract();
+    }
+  }
+});
+
+// Start auto-demo
+terminal.runDemo();
+
+/* ═══════════════════════════════════════════
+   COMMANDS SECTION
+   ═══════════════════════════════════════════ */
+const commandsGrid = document.getElementById('commands-grid');
+
+function renderCommands() {
+  commandsGrid.innerHTML = '';
+  COMMANDS.forEach(cmd => {
+    const card = document.createElement('div');
+    card.className = 'command-card';
+    card.dataset.category = cmd.category;
+    card.dataset.search = (cmd.syntax + ' ' + cmd.desc).toLowerCase();
+
+    card.innerHTML = `
+      <div class="command-syntax">${escHtml(cmd.syntax)}</div>
+      <div class="command-desc">${escHtml(cmd.desc)}</div>
+      <div class="command-meta">
+        <span class="command-badge ${CATEGORY_BADGE[cmd.category]}">${CATEGORY_LABELS[cmd.category]}</span>
+        <a class="command-try" data-example="${escAttr(cmd.example)}">Try it &rarr;</a>
+      </div>
+    `;
+    commandsGrid.appendChild(card);
+  });
+
+  // Try-it click handlers
+  commandsGrid.querySelectorAll('.command-try').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      const example = el.dataset.example;
+      onUserInteract();
+      document.getElementById('terminal').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        terminal.inputEl.value = example;
+        terminal.inputEl.focus();
+      }, 500);
+    });
+  });
+}
+
+function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escAttr(s) { return s.replace(/"/g, '&quot;').replace(/&/g, '&amp;'); }
+
+renderCommands();
+
+// Search + filter
+const searchInput = document.getElementById('commands-search');
+const filterBtns = document.querySelectorAll('.filter-btn');
+let activeFilter = 'all';
+
+searchInput.addEventListener('input', filterCommands);
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    filterCommands();
+  });
+});
+
+function filterCommands() {
+  const q = searchInput.value.toLowerCase().trim();
+  commandsGrid.querySelectorAll('.command-card').forEach(card => {
+    const matchFilter = activeFilter === 'all' || card.dataset.category === activeFilter;
+    const matchSearch = !q || card.dataset.search.includes(q);
+    card.classList.toggle('hidden', !(matchFilter && matchSearch));
+  });
+}
+
+/* ═══════════════════════════════════════════
+   SCHEMA SECTION
+   ═══════════════════════════════════════════ */
+const schemaGrid = document.getElementById('schema-grid');
+
+function renderSchema() {
+  schemaGrid.innerHTML = '';
+  SCHEMA_TABLES.forEach(table => {
+    const card = document.createElement('div');
+    card.className = 'table-card';
+    card.dataset.table = table.name;
+
+    let fieldsHtml = '';
+    table.fields.forEach(f => {
+      let badges = '';
+      if (f.pk) badges += '<span class="field-badge field-pk">PK</span>';
+      if (f.fk) badges += '<span class="field-badge field-fk">FK</span>';
+      fieldsHtml += `<div class="table-field"><code>${f.name}</code>${badges}<span class="field-type">${f.type}</span></div>`;
+    });
+
+    card.innerHTML = `
+      <div class="table-card-header"><span class="table-icon">&#9638;</span> ${table.name}</div>
+      <div class="table-card-fields">${fieldsHtml}</div>
+    `;
+    schemaGrid.appendChild(card);
+  });
+
+  // Draw FK lines after layout
+  requestAnimationFrame(() => { requestAnimationFrame(drawSchemaLines); });
+}
+
+function drawSchemaLines() {
+  const svg = document.getElementById('schema-svg');
+  const container = document.getElementById('schema-container');
+  const rect = container.getBoundingClientRect();
+
+  svg.setAttribute('width', container.offsetWidth);
+  svg.setAttribute('height', container.offsetHeight);
+  svg.innerHTML = '';
+
+  const fkPairs = [];
+  SCHEMA_TABLES.forEach(table => {
+    table.fields.forEach(f => {
+      if (f.fk) fkPairs.push({ from: table.name, to: f.fk, field: f.name });
+    });
+  });
+
+  fkPairs.forEach(pair => {
+    const fromCard = schemaGrid.querySelector(`[data-table="${pair.from}"]`);
+    const toCard = schemaGrid.querySelector(`[data-table="${pair.to}"]`);
+    if (!fromCard || !toCard) return;
+
+    const fromRect = fromCard.getBoundingClientRect();
+    const toRect = toCard.getBoundingClientRect();
+    const contRect = container.getBoundingClientRect();
+
+    const x1 = fromRect.left + fromRect.width / 2 - contRect.left;
+    const y1 = fromRect.top + fromRect.height / 2 - contRect.top;
+    const x2 = toRect.left + toRect.width / 2 - contRect.left;
+    const y2 = toRect.top + toRect.height / 2 - contRect.top;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    svg.appendChild(line);
+  });
+}
+
+renderSchema();
+window.addEventListener('resize', drawSchemaLines);
+
+/* ═══════════════════════════════════════════
+   COPY BUTTONS
+   ═══════════════════════════════════════════ */
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.copy;
+    const pre = document.getElementById(targetId);
+    if (pre) {
+      navigator.clipboard.writeText(pre.textContent).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+      });
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   HAMBURGER MENU
+   ═══════════════════════════════════════════ */
+document.querySelector('.hamburger').addEventListener('click', () => {
+  document.querySelector('.nav-links').classList.toggle('open');
+});
+
+// Close menu on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelector('.nav-links').classList.remove('open');
+  });
+});
+
+/* ═══════════════════════════════════════════
+   INTERSECTION OBSERVER — fade-in + active nav
+   ═══════════════════════════════════════════ */
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+// Active nav highlighting
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-60px 0px 0px 0px' });
+
+sections.forEach(s => navObserver.observe(s));
+
+})();
+</script>
+</body>
+</html>
