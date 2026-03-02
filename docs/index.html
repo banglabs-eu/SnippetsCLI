@@ -1025,7 +1025,8 @@ class TerminalSimulator {
     }
     this._refreshPrompt();
     this._scrollToBottom();
-    this.inputEl.focus();
+    if (!this.demoRunning) this.inputEl.focus();
+    else this.inputEl.focus({ preventScroll: true });
   }
 
   _refreshPrompt() {
@@ -1034,7 +1035,7 @@ class TerminalSimulator {
   }
 
   focus() {
-    if (this.inputEl) this.inputEl.focus();
+    if (this.inputEl) this.inputEl.focus({ preventScroll: true });
   }
 
   /* ─── Locator Parser (ported from locator.py) ─── */
@@ -1590,7 +1591,7 @@ class TerminalSimulator {
     this.demoStopped = false;
 
     const demoScript = [
-      { cmd: 'Knowledge is justified true belief p42', delay: 600 },
+      { cmd: 'Knowledge is justified true belief p42', delay: 2000 },
       { cmd: 'The cave allegory suggests we perceive shadows p514', delay: 600 },
       { cmd: 't philosophy, epistemology', delay: 500 },
       { cmd: 's1 +t ancient, plato', delay: 500 },
@@ -1621,14 +1622,18 @@ class TerminalSimulator {
       { cmd: 'va Plato', delay: 500 },
     ];
 
-    for (const step of demoScript) {
+    await this._wait(1500);
+    for (let i = 0; i < demoScript.length; i++) {
+      const step = demoScript[i];
       if (this.demoStopped) break;
       await this._typeText(step.cmd, 30);
       if (this.demoStopped) break;
       await this._wait(step.delay);
       if (this.demoStopped) break;
       this._submitCommand(step.cmd);
-      await this._wait(250);
+      if (this.demoStopped) break;
+      // Extra pause after first line so user can read it
+      await this._wait(i === 0 ? 2000 : 250);
     }
 
     this.demoRunning = false;
