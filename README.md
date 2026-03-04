@@ -29,6 +29,9 @@ EXPORT_DIR=./exports                # Directory for generated Markdown exports
 
 ```bash
 python3 main.py
+- or - 
+BACKEND_URL=https://api.snippets.eu python3 main.py
+# Find invites on https://www.reddit.com/r/Snippets_eu/
 ```
 
 On startup the CLI checks that the backend is reachable and validates any saved auth token. You must `login` or `register` before creating notes.
