@@ -243,12 +243,32 @@
       <div class="step-number">1</div>
       <div class="step-content">
         <h3>Install</h3>
-        <p>Run the install script. It clones the repo, sets up a virtual environment, installs dependencies, and configures everything interactively.</p>
-        <div class="code-block">
-          <button class="copy-btn" data-copy="clone-install">Copy</button>
-          <pre id="clone-install">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
+        <div class="platform-toggle" id="install-platform-toggle">
+          <button class="platform-btn active" data-platform="linux">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            Linux / macOS
+          </button>
+          <button class="platform-btn" data-platform="windows">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M2 10h20"/></svg>
+            Windows
+          </button>
         </div>
-        <p class="setup-note">Requires Python 3.10+ and git. The installer will ask whether to connect to an existing backend or self-host with Docker.</p>
+        <div class="platform-panel active" data-platform="linux">
+          <p>Run the install script. It clones the repo, sets up a virtual environment, installs dependencies, and connects to the Snippets API.</p>
+          <div class="code-block">
+            <button class="copy-btn" data-copy="install-linux">Copy</button>
+            <pre id="install-linux">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
+          </div>
+          <p class="setup-note">Requires Python 3.10+ and git.</p>
+        </div>
+        <div class="platform-panel" data-platform="windows">
+          <p>Run the install script in PowerShell. It clones the repo, sets up a virtual environment, installs dependencies, and configures everything interactively.</p>
+          <div class="code-block">
+            <button class="copy-btn" data-copy="install-windows">Copy</button>
+            <pre id="install-windows">irm https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.ps1 | iex</pre>
+          </div>
+          <p class="setup-note">Requires Python 3.10+ and git. The installer will ask whether to connect to the API online or self-host with Docker.</p>
+        </div>
       </div>
     </div>
 
@@ -268,10 +288,29 @@
       <div class="step-number">3</div>
       <div class="step-content">
         <h3>Update</h3>
-        <p>Re-run the installer to pull the latest version.</p>
-        <div class="code-block">
-          <button class="copy-btn" data-copy="env-config">Copy</button>
-          <pre id="env-config">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
+        <div class="platform-toggle" id="update-platform-toggle">
+          <button class="platform-btn active" data-platform="linux">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            Linux / macOS
+          </button>
+          <button class="platform-btn" data-platform="windows">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M2 10h20"/></svg>
+            Windows
+          </button>
+        </div>
+        <div class="platform-panel active" data-platform="linux">
+          <p>Re-run the installer to pull the latest version.</p>
+          <div class="code-block">
+            <button class="copy-btn" data-copy="update-linux">Copy</button>
+            <pre id="update-linux">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
+          </div>
+        </div>
+        <div class="platform-panel" data-platform="windows">
+          <p>Re-run the installer to pull the latest version.</p>
+          <div class="code-block">
+            <button class="copy-btn" data-copy="update-windows">Copy</button>
+            <pre id="update-windows">irm https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.ps1 | iex</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -1208,6 +1247,24 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
         setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
       });
     }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   PLATFORM TOGGLES
+   ═══════════════════════════════════════════ */
+document.querySelectorAll('.platform-toggle').forEach(function (toggle) {
+  var step = toggle.parentElement;
+  toggle.querySelectorAll('.platform-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var platform = btn.dataset.platform;
+      toggle.querySelectorAll('.platform-btn').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.platform === platform);
+      });
+      step.querySelectorAll('.platform-panel').forEach(function (p) {
+        p.classList.toggle('active', p.dataset.platform === platform);
+      });
+    });
   });
 });
 

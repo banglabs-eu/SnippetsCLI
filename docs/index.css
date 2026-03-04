@@ -791,6 +791,34 @@ section {
   color: var(--text-dim);
   font-size: 0.85em;
 }
+.platform-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.platform-btn:hover { border-color: var(--text-faint); color: var(--text-dim); }
+.platform-btn.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+.platform-btn svg { width: 14px; height: 14px; }
+.platform-panel { display: none; }
+.platform-panel.active { display: block; }
 .code-block {
   position: relative;
   background: var(--bg-card);
