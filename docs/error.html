@@ -6,6 +6,14 @@
   <title>404 — Snippets Docs</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%236366f1'/><text x='16' y='23' text-anchor='middle' font-family='monospace' font-size='16' font-weight='bold' fill='%23ffffff'>{S}</text></svg>">
   <link rel="stylesheet" href="shared.css">
+  <script>
+  (function(){
+    var t=localStorage.getItem('snippets-theme')||'auto';
+    document.documentElement.setAttribute('data-theme',t);
+    if(t==='auto'&&window.matchMedia('(prefers-color-scheme:light)').matches)
+      document.documentElement.classList.add('prefers-light');
+  })();
+  </script>
   <style>
     body {
       min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -25,6 +33,8 @@
     .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
     .btn-secondary:hover { background: var(--accent); color: #fff; }
     .footer { margin-top: auto; padding-top: 3rem; color: var(--text-faint); font-size: 0.8rem; }
+    :is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .subtitle { color: #1e293b; }
+    :is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .message { color: #64748b; }
   </style>
 </head>
 <body>

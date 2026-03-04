@@ -37,7 +37,7 @@
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 1000;
-  background: rgba(11, 11, 17, 0.88);
+  background: var(--nav-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
@@ -758,3 +758,85 @@ footer a:hover { color: var(--accent-light); text-decoration: underline; }
 .stagger > .fade-in:nth-child(7) { transition-delay: 360ms; }
 .stagger > .fade-in:nth-child(8) { transition-delay: 420ms; }
 .stagger > .fade-in:nth-child(9) { transition-delay: 480ms; }
+
+/* ─── Theme toggle ─── */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition), color var(--transition);
+}
+.theme-toggle:hover {
+  border-color: var(--text-faint);
+  color: var(--text);
+}
+.theme-toggle svg { width: 16px; height: 16px; display: none; }
+[data-theme="auto"] .theme-toggle .icon-auto,
+:root:not([data-theme]) .theme-toggle .icon-auto { display: block; }
+[data-theme="light"] .theme-toggle .icon-light { display: block; }
+[data-theme="dark"] .theme-toggle .icon-dark { display: block; }
+
+/* ─── Light mode component overrides ─── */
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .terminal {
+  --bg: #0a0e17;
+  --bg-raised: #0f1520;
+  --bg-card: #141c2b;
+  --bg-card-hover: #1a2438;
+  --border: #1e293b;
+  --border-light: #2a3a50;
+  --text: #eaf0f6;
+  --text-dim: #7a8ba0;
+  --text-faint: #4a5568;
+  --accent-light: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --green: #22ee88;
+  --green-dim: #1a9960;
+  --green-glow: rgba(34, 238, 136, 0.10);
+  --amber: #f59e0b;
+  --blue: #5588ee;
+  --purple: #9977ee;
+  --rose: #ee4466;
+  --cyan: #44ccbb;
+}
+
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .bg-glow {
+  opacity: 0.025;
+}
+
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) #hero::before {
+  opacity: 0.18;
+}
+
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .hero-org-badge .org-name,
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .footer-brand {
+  background: linear-gradient(135deg, #4f46e5, #6366f1, #c7d2fe);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .badge-notes {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .badge-sources {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+}
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .badge-tags {
+  background: rgba(124, 58, 237, 0.1);
+  color: #6d28d9;
+}
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .badge-viewing {
+  background: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+}
+:is([data-theme="light"], :root:not([data-theme="dark"]).prefers-light) .badge-system {
+  background: rgba(100, 116, 139, 0.1);
+  color: #475569;
+}
