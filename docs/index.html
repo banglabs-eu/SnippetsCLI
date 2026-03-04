@@ -4,86 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Snippets CLI — Note-taking for your terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ─── Reset & Base ─── */
+/* ─── Variables ─── */
+:root {
+  --bg: #0b0b11;
+  --bg-raised: #111119;
+  --bg-card: #16161f;
+  --bg-card-hover: #1b1b26;
+  --border: #232333;
+  --border-light: #2e2e42;
+  --text: #e8e1d8;
+  --text-dim: #908a82;
+  --text-faint: #5a5660;
+  --green: #22ee88;
+  --green-dim: #1a9960;
+  --green-glow: rgba(34, 238, 136, 0.10);
+  --amber: #eea622;
+  --blue: #5588ee;
+  --purple: #9977ee;
+  --rose: #ee4466;
+  --cyan: #44ccbb;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+}
+
+/* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: 70px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0d1117;
-  color: #e6edf3;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(35, 35, 51, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(35, 35, 51, 0.12) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #161b22; }
-::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.mono { font-family: var(--font-mono); }
 
-/* ─── Monospace family ─── */
-.mono, code, pre, .terminal-body, .terminal-input {
-  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+/* ─── Grain overlay ─── */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.028;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
 }
 
-/* ─── Colors ─── */
-:root {
-  --bg: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --border: #30363d;
-  --text: #e6edf3;
-  --text-muted: #8b949e;
-  --green: #3fb950;
-  --green-dim: #238636;
-  --blue: #58a6ff;
-  --orange: #d29922;
-  --purple: #bc8cff;
-  --red: #f85149;
-  --cyan: #79c0ff;
+/* ─── Background glows ─── */
+.bg-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+  z-index: -1;
 }
+.bg-glow-1 {
+  width: 600px; height: 600px;
+  background: var(--green);
+  opacity: 0.045;
+  top: -200px; right: -100px;
+  animation: drift1 25s ease-in-out infinite;
+}
+.bg-glow-2 {
+  width: 500px; height: 500px;
+  background: var(--purple);
+  opacity: 0.04;
+  bottom: 20%; left: -150px;
+  animation: drift2 30s ease-in-out infinite;
+}
+.bg-glow-3 {
+  width: 400px; height: 400px;
+  background: var(--amber);
+  opacity: 0.03;
+  top: 55%; right: 5%;
+  animation: drift3 20s ease-in-out infinite;
+}
+@keyframes drift1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 20px); } }
+@keyframes drift2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, -30px); } }
+@keyframes drift3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-25px, 15px); } }
 
 /* ─── Navigation ─── */
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 1000;
-  background: rgba(13, 17, 23, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(11, 11, 17, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 60px;
+  padding: 0 28px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .nav-brand {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--green);
-  text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
-.nav-brand span { color: var(--text-muted); font-weight: 400; }
+.nav-brand a {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--green);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.nav-brand a span { color: var(--text-faint); font-weight: 400; }
 .nav-org {
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 500;
   color: #c7d2fe;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 6px;
   padding: 2px 8px;
   text-decoration: none;
   transition: background 0.2s, border-color 0.2s;
 }
 .nav-org:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
 }
-.nav-links { display: flex; gap: 24px; list-style: none; }
+.nav-links { display: flex; gap: 20px; list-style: none; align-items: center; }
 .nav-links a {
-  color: var(--text-muted);
+  color: var(--text-dim);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   padding: 4px 0;
   border-bottom: 2px solid transparent;
   transition: color 0.2s, border-color 0.2s;
@@ -92,12 +152,25 @@ nav {
   color: var(--text);
   border-bottom-color: var(--green);
 }
+.cheatsheet-link {
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  border-bottom: 1px solid var(--border) !important;
+  transition: border-color 0.2s, background 0.2s, color 0.2s !important;
+}
+.cheatsheet-link:hover {
+  border-color: var(--blue) !important;
+  background: rgba(85, 136, 238, 0.08) !important;
+  color: #fff !important;
+}
 .hamburger {
   display: none;
   background: none;
   border: none;
   color: var(--text);
-  font-size: 24px;
+  font-size: 22px;
   cursor: pointer;
   padding: 4px;
 }
@@ -106,11 +179,11 @@ nav {
   .nav-links {
     display: none;
     position: absolute;
-    top: 60px; left: 0; right: 0;
-    background: var(--bg-secondary);
+    top: 56px; left: 0; right: 0;
+    background: var(--bg-raised);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
-    padding: 16px 24px;
+    padding: 16px 28px;
     gap: 12px;
   }
   .nav-links.open { display: flex; }
@@ -118,26 +191,39 @@ nav {
 
 /* ─── Sections ─── */
 section {
-  max-width: 1100px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 100px 28px;
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+  display: block;
+  margin-bottom: 12px;
 }
 .section-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.15;
   margin-bottom: 8px;
 }
 .section-subtitle {
-  color: var(--text-muted);
-  font-size: 16px;
-  margin-bottom: 40px;
+  color: var(--text-dim);
+  font-size: 15px;
+  margin-bottom: 48px;
+  max-width: 520px;
 }
 
-/* ─── Fade-in animation ─── */
+/* ─── Scroll reveal ─── */
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .fade-in.visible {
   opacity: 1;
@@ -146,194 +232,277 @@ section {
 
 /* ─── Hero ─── */
 #hero {
-  padding-top: 120px;
+  padding-top: 130px;
+  padding-bottom: 80px;
   text-align: center;
+  position: relative;
 }
-.hero-title {
-  font-size: clamp(36px, 6vw, 56px);
-  font-weight: 800;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--green), var(--blue));
+#hero::before {
+  content: '\201C';
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: min(40vw, 420px);
+  color: var(--border);
+  opacity: 0.35;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.hero-org-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 5px 16px;
+  border-radius: 20px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.hero-org-badge:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+.hero-org-badge .org-name {
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #c7d2fe, #6366f1, #06b6d4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.hero-org-badge .org-sep { color: rgba(99, 102, 241, 0.35); font-size: 13px; }
+.hero-org-badge .org-project { font-size: 12px; color: var(--text-dim); }
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 7.5vw, 80px);
+  font-weight: 600;
+  line-height: 1.05;
+  margin-bottom: 20px;
+  color: var(--text);
+  position: relative;
+  z-index: 1;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--green);
+  -webkit-text-fill-color: var(--green);
+}
 .hero-subtitle {
-  font-size: clamp(16px, 2.5vw, 20px);
-  color: var(--text-muted);
-  max-width: 600px;
-  margin: 0 auto 48px;
+  font-family: var(--font-body);
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--text-dim);
+  max-width: 540px;
+  margin: 0 auto 56px;
+  line-height: 1.65;
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Terminal ─── */
 .terminal {
-  max-width: 780px;
+  max-width: 760px;
   margin: 0 auto;
-  background: #1a1b26;
-  border-radius: 12px;
+  background: #0e0e16;
+  border-radius: 14px;
   border: 1px solid var(--border);
   overflow: hidden;
   text-align: left;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(34, 238, 136, 0.06),
+    0 0 50px rgba(34, 238, 136, 0.04),
+    0 0 120px rgba(34, 238, 136, 0.02),
+    0 24px 64px rgba(0, 0, 0, 0.5);
+}
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.012) 3px,
+    rgba(0, 0, 0, 0.012) 6px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 2;
 }
 .terminal-titlebar {
-  background: var(--bg-tertiary);
-  padding: 10px 16px;
+  background: var(--bg-card);
+  padding: 11px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
 }
-.terminal-dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-}
+.terminal-dot { width: 11px; height: 11px; border-radius: 50%; }
 .terminal-dot.red { background: #ff5f56; }
 .terminal-dot.yellow { background: #ffbd2e; }
 .terminal-dot.green { background: #27c93f; }
 .terminal-titlebar-text {
   flex: 1;
   text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.03em;
 }
 .terminal-body {
   padding: 16px;
   min-height: 380px;
   max-height: 480px;
   overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+  z-index: 1;
 }
-.terminal-body::-webkit-scrollbar { width: 6px; }
-.terminal-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+.terminal-body::-webkit-scrollbar { width: 5px; }
+.terminal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .terminal-line { white-space: pre-wrap; word-break: break-word; }
-.terminal-line.output { color: var(--text-muted); }
+.terminal-line.output { color: var(--text-dim); }
 .terminal-line.success { color: var(--green); }
 .terminal-line.info { color: var(--cyan); }
-.terminal-line.error { color: var(--red); }
-.terminal-line.accent { color: var(--orange); }
-.terminal-line.dim { color: #484f58; }
-.terminal-input-line {
-  display: flex;
-  align-items: center;
-}
+.terminal-line.error { color: var(--rose); }
+.terminal-line.accent { color: var(--amber); }
+.terminal-line.dim { color: #3d3d50; }
+.terminal-input-line { display: flex; align-items: center; }
 .terminal-prompt {
   color: var(--green);
   white-space: nowrap;
   margin-right: 4px;
+  text-shadow: 0 0 12px rgba(34, 238, 136, 0.3);
 }
 .terminal-input {
   flex: 1;
   background: none;
   border: none;
   color: var(--text);
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   outline: none;
   caret-color: var(--green);
-  font-family: inherit;
 }
 .terminal-cursor {
   display: inline-block;
   width: 8px;
-  height: 16px;
+  height: 15px;
   background: var(--green);
   animation: blink 1s step-end infinite;
   vertical-align: text-bottom;
+  box-shadow: 0 0 8px rgba(34, 238, 136, 0.4);
 }
-@keyframes blink {
-  50% { opacity: 0; }
-}
+@keyframes blink { 50% { opacity: 0; } }
 .terminal-click-hint {
   text-align: center;
   padding: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 11px;
+  color: var(--text-faint);
   border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Features ─── */
 .features-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 18px;
 }
-@media (max-width: 768px) {
-  .features-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .features-grid { grid-template-columns: 1fr; }
-}
+@media (max-width: 768px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .features-grid { grid-template-columns: 1fr; } }
 .feature-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  transition: transform 0.2s, border-color 0.2s;
+  border-left: 3px solid var(--green);
+  border-radius: 2px 10px 10px 2px;
+  padding: 22px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.25s;
 }
+.feature-card:nth-child(3n+2) { border-left-color: var(--amber); }
+.feature-card:nth-child(3n) { border-left-color: var(--blue); }
 .feature-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--green-dim);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
 .feature-icon {
-  font-size: 28px;
-  margin-bottom: 12px;
+  font-size: 24px;
+  margin-bottom: 10px;
   display: block;
+  filter: grayscale(0.1);
 }
 .feature-card h3 {
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
 }
 .feature-card p {
-  font-size: 14px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+.feature-card code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--green);
+  background: rgba(34, 238, 136, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 
 /* ─── Commands ─── */
-.cheatsheet-link {
-  border: 1px solid var(--border) !important;
-  border-radius: 6px !important;
-  padding: 4px 12px !important;
-  font-size: 12px !important;
-  transition: border-color 0.2s, background 0.2s, color 0.2s !important;
-}
-.cheatsheet-link:hover {
-  border-color: var(--blue) !important;
-  background: rgba(88, 166, 255, 0.1);
-  color: #fff !important;
-}
 .commands-toolbar {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 24px;
   flex-wrap: wrap;
   align-items: center;
 }
 .commands-search {
   flex: 1;
-  min-width: 200px;
-  background: var(--bg-secondary);
+  min-width: 180px;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 9px 14px;
   color: var(--text);
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.commands-search:focus { border-color: var(--green); }
-.commands-search::placeholder { color: var(--text-muted); }
+.commands-search:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(34, 238, 136, 0.08);
+}
+.commands-search::placeholder { color: var(--text-faint); }
 .filter-btn {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 14px;
-  color: var(--text-muted);
-  font-size: 13px;
+  padding: 7px 14px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition: all 0.2s;
 }
-.filter-btn:hover { border-color: var(--text-muted); color: var(--text); }
+.filter-btn:hover { border-color: var(--text-faint); color: var(--text-dim); }
 .filter-btn.active {
   background: var(--green-dim);
   border-color: var(--green);
@@ -342,30 +511,32 @@ section {
 .commands-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 14px;
 }
-@media (max-width: 768px) {
-  .commands-grid { grid-template-columns: 1fr; }
-}
+@media (max-width: 768px) { .commands-grid { grid-template-columns: 1fr; } }
 .command-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.command-card:hover { border-color: var(--green-dim); }
+.command-card:hover {
+  border-color: var(--border-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
 .command-card.hidden { display: none; }
 .command-syntax {
-  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   color: var(--green);
   margin-bottom: 4px;
 }
 .command-desc {
   font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  line-height: 1.45;
 }
 .command-meta {
   display: flex;
@@ -374,22 +545,25 @@ section {
   gap: 8px;
 }
 .command-badge {
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 10px;
   padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 600;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
-.badge-notes { background: rgba(63, 185, 80, 0.15); color: var(--green); }
-.badge-sources { background: rgba(88, 166, 255, 0.15); color: var(--blue); }
-.badge-tags { background: rgba(188, 140, 255, 0.15); color: var(--purple); }
-.badge-viewing { background: rgba(210, 153, 34, 0.15); color: var(--orange); }
-.badge-system { background: rgba(139, 148, 158, 0.15); color: var(--text-muted); }
+.badge-notes { background: rgba(34, 238, 136, 0.1); color: var(--green); }
+.badge-sources { background: rgba(85, 136, 238, 0.1); color: var(--blue); }
+.badge-tags { background: rgba(153, 119, 238, 0.1); color: var(--purple); }
+.badge-viewing { background: rgba(238, 166, 34, 0.1); color: var(--amber); }
+.badge-system { background: rgba(144, 138, 130, 0.1); color: var(--text-dim); }
 .command-try {
-  font-size: 12px;
-  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
   cursor: pointer;
   text-decoration: none;
-  opacity: 0.7;
+  opacity: 0.6;
   transition: opacity 0.2s;
 }
 .command-try:hover { opacity: 1; text-decoration: underline; }
@@ -401,51 +575,61 @@ section {
 }
 .schema-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
   position: relative;
   z-index: 1;
 }
 .table-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.table-card:hover {
+  border-color: var(--border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 .table-card-header {
-  background: var(--bg-tertiary);
+  background: var(--bg-raised);
   padding: 10px 14px;
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .table-card-header .table-icon { color: var(--blue); }
-.table-card-fields { padding: 8px 0; }
+.table-card-fields { padding: 6px 0; }
 .table-field {
-  padding: 4px 14px;
-  font-size: 13px;
+  padding: 3px 14px;
+  font-size: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .table-field code {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--text);
 }
 .field-badge {
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
   padding: 1px 5px;
-  border-radius: 4px;
+  border-radius: 3px;
   font-weight: 700;
+  letter-spacing: 0.03em;
 }
-.field-pk { background: rgba(210, 153, 34, 0.2); color: var(--orange); }
-.field-fk { background: rgba(88, 166, 255, 0.2); color: var(--blue); }
+.field-pk { background: rgba(238, 166, 34, 0.15); color: var(--amber); }
+.field-fk { background: rgba(85, 136, 238, 0.15); color: var(--blue); }
 .field-type {
-  color: var(--text-muted);
-  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
   margin-left: auto;
 }
 .schema-svg {
@@ -456,67 +640,74 @@ section {
   pointer-events: none;
 }
 .schema-svg line {
-  stroke: var(--border);
+  stroke: var(--border-light);
   stroke-width: 1.5;
-  stroke-dasharray: 6, 4;
+  stroke-dasharray: 5, 4;
+  opacity: 0.7;
 }
 
 /* ─── Architecture ─── */
 .arch-flow {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 .arch-row {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 .arch-card {
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 16px 20px;
-  min-width: 160px;
+  padding: 14px 20px;
+  min-width: 150px;
   text-align: center;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 .arch-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--green-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 .arch-card .filename {
-  font-family: 'SF Mono', 'Cascadia Code', monospace;
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   color: var(--green);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .arch-card .filedesc {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-dim);
 }
 .arch-card .lines {
-  font-size: 11px;
-  color: var(--text-muted);
-  opacity: 0.6;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-faint);
   margin-top: 4px;
 }
 .arch-arrow {
   text-align: center;
-  color: var(--text-muted);
-  font-size: 24px;
+  color: var(--text-faint);
+  font-size: 20px;
   line-height: 1;
+  letter-spacing: 4px;
 }
 .arch-card.entry { border-color: var(--green-dim); }
-.arch-card.core { border-color: var(--blue); border-opacity: 0.4; }
-.arch-card.data { border-color: var(--orange); border-opacity: 0.4; }
+.arch-card.core { border-color: rgba(85, 136, 238, 0.35); }
+.arch-card.data { border-color: rgba(238, 166, 34, 0.35); }
+.arch-card.external {
+  border-style: dashed;
+  border-color: var(--text-faint);
+  background: transparent;
+}
 
 /* ─── Setup ─── */
 .setup-steps {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 36px;
 }
 .setup-step {
   display: flex;
@@ -524,106 +715,81 @@ section {
   align-items: flex-start;
 }
 .step-number {
-  width: 40px; height: 40px;
-  min-width: 40px;
+  width: 36px; height: 36px;
+  min-width: 36px;
   background: var(--green-dim);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
+  box-shadow: 0 0 16px rgba(34, 238, 136, 0.15);
 }
 .step-content { flex: 1; }
 .step-content h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 .step-content p {
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .code-block {
   position: relative;
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
 }
 .code-block pre {
   padding: 14px 16px;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.65;
+  color: var(--text-dim);
 }
 .code-block .copy-btn {
   position: absolute;
   top: 8px; right: 8px;
-  background: var(--bg-tertiary);
+  background: var(--bg-raised);
   border: 1px solid var(--border);
   border-radius: 6px;
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 4px 10px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 10px;
   cursor: pointer;
   transition: all 0.2s;
+  letter-spacing: 0.03em;
 }
 .code-block .copy-btn:hover {
   color: var(--text);
-  border-color: var(--text-muted);
-}
-
-/* ─── Bang Labs badge ─── */
-.hero-org-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding: 6px 16px;
-  border-radius: 20px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  text-decoration: none;
-  transition: background 0.2s, border-color 0.2s;
-}
-.hero-org-badge:hover {
-  background: rgba(99, 102, 241, 0.18);
-  border-color: rgba(99, 102, 241, 0.5);
-}
-.hero-org-badge .org-name {
-  font-size: 14px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #c7d2fe, #6366f1, #06b6d4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.hero-org-badge .org-sep {
-  color: rgba(99, 102, 241, 0.4);
-  font-size: 14px;
-}
-.hero-org-badge .org-project {
-  font-size: 13px;
-  color: var(--text-muted);
+  border-color: var(--text-faint);
 }
 
 /* ─── Footer ─── */
 footer {
   border-top: 1px solid var(--border);
-  padding: 40px 24px;
+  padding: 48px 28px;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--text-faint);
   font-size: 13px;
 }
 footer a {
-  color: var(--blue);
+  color: var(--cyan);
   text-decoration: none;
+  transition: color 0.2s;
 }
-footer a:hover { text-decoration: underline; }
+footer a:hover { color: var(--text); text-decoration: underline; }
 .footer-brand {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 4px;
   background: linear-gradient(135deg, #c7d2fe, #6366f1, #06b6d4);
@@ -635,16 +801,35 @@ footer a:hover { text-decoration: underline; }
 .footer-links {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 20px;
+  margin-top: 14px;
 }
+
+/* ─── Stagger children ─── */
+.stagger > .fade-in:nth-child(2) { transition-delay: 60ms; }
+.stagger > .fade-in:nth-child(3) { transition-delay: 120ms; }
+.stagger > .fade-in:nth-child(4) { transition-delay: 180ms; }
+.stagger > .fade-in:nth-child(5) { transition-delay: 240ms; }
+.stagger > .fade-in:nth-child(6) { transition-delay: 300ms; }
+.stagger > .fade-in:nth-child(7) { transition-delay: 360ms; }
+.stagger > .fade-in:nth-child(8) { transition-delay: 420ms; }
+.stagger > .fade-in:nth-child(9) { transition-delay: 480ms; }
 </style>
 </head>
 <body>
 
-<!-- ─── Navigation ─── -->
+<!-- Atmosphere -->
+<div class="grain"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+
+<!-- Navigation -->
 <nav>
-  <div class="nav-brand"><a href="#hero" style="color:inherit;text-decoration:none">&gt;_ snippets<span>.cli</span></a> <a href="https://bang-labs.eu" class="nav-org" target="_blank" rel="noopener">Bang Labs</a></div>
+  <div class="nav-brand">
+    <a href="#hero">&gt;_ snippets<span>.cli</span></a>
+    <a href="https://bang-labs.eu" class="nav-org" target="_blank" rel="noopener">Bang Labs</a>
+  </div>
   <button class="hamburger" aria-label="Menu">&#9776;</button>
   <ul class="nav-links">
     <li><a href="#hero">Try It</a></li>
@@ -653,11 +838,11 @@ footer a:hover { text-decoration: underline; }
     <li><a href="#schema">Schema</a></li>
     <li><a href="#architecture">Architecture</a></li>
     <li><a href="#setup">Setup</a></li>
-    <li><a href="cheatsheet.html" class="cheatsheet-link" target="_blank">Cheatsheet (PDF)</a></li>
+    <li><a href="cheatsheet.html" class="cheatsheet-link" target="_blank">Cheatsheet</a></li>
   </ul>
 </nav>
 
-<!-- ─── Hero + Terminal ─── -->
+<!-- Hero + Terminal -->
 <section id="hero">
   <div class="fade-in">
     <a href="https://bang-labs.eu" class="hero-org-badge" target="_blank" rel="noopener">
@@ -665,7 +850,7 @@ footer a:hover { text-decoration: underline; }
       <span class="org-sep">/</span>
       <span class="org-project">snippets-cli</span>
     </a>
-    <h1 class="hero-title">Note-taking for your terminal</h1>
+    <h1 class="hero-title">Note-taking for<br>your <em>terminal</em></h1>
     <p class="hero-subtitle">A PostgreSQL-backed REPL for capturing Markdown snippets with source citations, tags, locator references, and structured export.</p>
   </div>
 
@@ -680,15 +865,16 @@ footer a:hover { text-decoration: underline; }
       <div class="terminal-line info">Snippets CLI ready. Type 'help' for commands.</div>
       <div class="terminal-line dim"></div>
     </div>
-    <div class="terminal-click-hint" id="terminal-hint">Click or start typing to interact</div>
+    <div class="terminal-click-hint" id="terminal-hint">click or start typing to interact</div>
   </div>
 </section>
 
-<!-- ─── Features ─── -->
+<!-- Features -->
 <section id="features">
-  <h2 class="section-title fade-in">Features</h2>
-  <p class="section-subtitle fade-in">Everything you need for structured note-taking, right in your terminal.</p>
-  <div class="features-grid">
+  <span class="section-label fade-in">01 / Features</span>
+  <h2 class="section-title fade-in">Everything for structured note-taking</h2>
+  <p class="section-subtitle fade-in">Capture, cite, tag, search, and export &mdash; all from one prompt.</p>
+  <div class="features-grid stagger">
     <div class="feature-card fade-in">
       <span class="feature-icon">&#9889;</span>
       <h3>Instant Capture</h3>
@@ -737,10 +923,11 @@ footer a:hover { text-decoration: underline; }
   </div>
 </section>
 
-<!-- ─── Commands ─── -->
+<!-- Commands -->
 <section id="commands">
+  <span class="section-label fade-in">02 / Commands</span>
   <h2 class="section-title fade-in">Command Reference</h2>
-  <p class="section-subtitle fade-in">Every command available in the REPL. Click an example to try it in the terminal.</p>
+  <p class="section-subtitle fade-in">Every command available in the REPL. Click an example to try it in the terminal above.</p>
 
   <div class="commands-toolbar fade-in">
     <input type="text" class="commands-search" id="commands-search" placeholder="Search commands...">
@@ -752,91 +939,84 @@ footer a:hover { text-decoration: underline; }
     <button class="filter-btn" data-filter="system">System</button>
   </div>
 
-  <div class="commands-grid" id="commands-grid">
-    <!-- Populated by JS -->
-  </div>
+  <div class="commands-grid" id="commands-grid"></div>
 </section>
 
-<!-- ─── Schema ─── -->
+<!-- Schema -->
 <section id="schema">
+  <span class="section-label fade-in">03 / Schema</span>
   <h2 class="section-title fade-in">Database Schema</h2>
   <p class="section-subtitle fade-in">Seven PostgreSQL tables for notes, sources, authors, publishers, tags, and metadata.</p>
   <div class="schema-container fade-in" id="schema-container">
     <svg class="schema-svg" id="schema-svg"></svg>
-    <div class="schema-grid" id="schema-grid">
-      <!-- Populated by JS -->
-    </div>
+    <div class="schema-grid" id="schema-grid"></div>
   </div>
 </section>
 
-<!-- ─── Architecture ─── -->
+<!-- Architecture -->
 <section id="architecture">
+  <span class="section-label fade-in">04 / Architecture</span>
   <h2 class="section-title fade-in">Architecture</h2>
-  <p class="section-subtitle fade-in">Nine files, ~1,650 lines. Simple, linear data flow.</p>
+  <p class="section-subtitle fade-in">Simple, linear data flow. CLI talks to a FastAPI backend over HTTP.</p>
   <div class="arch-flow fade-in">
     <div class="arch-row">
       <div class="arch-card entry">
         <div class="filename">main.py</div>
         <div class="filedesc">REPL entry point</div>
-        <div class="lines">54 lines</div>
       </div>
     </div>
     <div class="arch-arrow">&darr;</div>
     <div class="arch-row">
       <div class="arch-card core">
         <div class="filename">commands.py</div>
-        <div class="filedesc">Command dispatch + logic</div>
-        <div class="lines">474 lines</div>
+        <div class="filedesc">Command dispatch &amp; logic</div>
       </div>
     </div>
     <div class="arch-arrow">&darr;</div>
     <div class="arch-row">
       <div class="arch-card data">
-        <div class="filename">db.py</div>
-        <div class="filedesc">Data access layer (SQL)</div>
-        <div class="lines">487 lines</div>
+        <div class="filename">client.py</div>
+        <div class="filedesc">HTTP API client</div>
       </div>
       <div class="arch-card">
         <div class="filename">export.py</div>
         <div class="filedesc">Markdown export</div>
-        <div class="lines">155 lines</div>
       </div>
       <div class="arch-card">
         <div class="filename">locator.py</div>
         <div class="filedesc">Page/time parsing</div>
-        <div class="lines">43 lines</div>
       </div>
       <div class="arch-card">
         <div class="filename">session.py</div>
         <div class="filedesc">Session state</div>
-        <div class="lines">12 lines</div>
       </div>
     </div>
     <div class="arch-arrow">&darr;</div>
     <div class="arch-row">
       <div class="arch-card">
-        <div class="filename">picker.py</div>
-        <div class="filedesc">Interactive note picker</div>
-        <div class="lines">120 lines</div>
-      </div>
-      <div class="arch-card">
         <div class="filename">completers.py</div>
         <div class="filedesc">Tab completers</div>
-        <div class="lines">224 lines</div>
       </div>
-      <div class="arch-card data">
-        <div class="filename">schema.sql</div>
-        <div class="filedesc">PostgreSQL DDL + seeds</div>
-        <div class="lines">76 lines</div>
+      <div class="arch-card">
+        <div class="filename">picker.py</div>
+        <div class="filedesc">Interactive note picker</div>
+      </div>
+    </div>
+    <div class="arch-arrow">&darr;</div>
+    <div class="arch-row">
+      <div class="arch-card external">
+        <div class="filename">Backend API</div>
+        <div class="filedesc">FastAPI + PostgreSQL</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── Setup ─── -->
+<!-- Setup -->
 <section id="setup">
-  <h2 class="section-title fade-in">Getting Started</h2>
-  <p class="section-subtitle fade-in">Three steps to start taking notes.</p>
+  <span class="section-label fade-in">05 / Getting Started</span>
+  <h2 class="section-title fade-in">Three steps to start taking notes</h2>
+  <p class="section-subtitle fade-in">Clone, configure, run.</p>
   <div class="setup-steps fade-in">
 
     <div class="setup-step">
@@ -859,13 +1039,13 @@ pip install -r requirements.txt</pre>
       <div class="step-number">2</div>
       <div class="step-content">
         <h3>Configure Environment</h3>
-        <p>Copy <code>.env.example</code> to <code>.env</code> and set your PostgreSQL connection string.</p>
+        <p>Copy <code>.env.example</code> to <code>.env</code> and set your backend URL and export directory.</p>
         <div class="code-block">
           <button class="copy-btn" data-copy="env-config">Copy</button>
           <pre id="env-config">cp .env.example .env
 
-# Edit .env with your database credentials:
-DATABASE_URL=postgresql://user:password@host:port/dbname
+# Edit .env:
+BACKEND_URL=http://localhost:8000
 EXPORT_DIR=./exports</pre>
         </div>
       </div>
@@ -875,10 +1055,14 @@ EXPORT_DIR=./exports</pre>
       <div class="step-number">3</div>
       <div class="step-content">
         <h3>Run</h3>
-        <p>Launch the REPL. The schema is created automatically on first run.</p>
+        <p>Start the backend, then launch the CLI.</p>
         <div class="code-block">
           <button class="copy-btn" data-copy="run-cmd">Copy</button>
-          <pre id="run-cmd">python main.py</pre>
+          <pre id="run-cmd"># Backend (separate repo)
+docker compose up --build
+
+# CLI
+python main.py</pre>
         </div>
       </div>
     </div>
@@ -886,10 +1070,10 @@ EXPORT_DIR=./exports</pre>
   </div>
 </section>
 
-<!-- ─── Footer ─── -->
+<!-- Footer -->
 <footer>
   <a href="https://bang-labs.eu" class="footer-brand" target="_blank" rel="noopener">Bang Labs</a>
-  <p>Open source projects. Built in public. Contributions welcome.</p>
+  <p>Open source. Built in public. Contributions welcome.</p>
   <p style="margin-top: 6px;">MIT License &copy; 2026 Adam Bang Kjems</p>
   <div class="footer-links">
     <a href="https://github.com/banglabs-eu/snippets-cli">GitHub</a>
@@ -897,7 +1081,7 @@ EXPORT_DIR=./exports</pre>
   </div>
 </footer>
 
-<!-- ─── JavaScript ─── -->
+<!-- JavaScript -->
 <script>
 (function() {
 'use strict';
@@ -906,18 +1090,18 @@ EXPORT_DIR=./exports</pre>
    COMMANDS DATA
    ═══════════════════════════════════════════ */
 const COMMANDS = [
-  { syntax: '<text>', desc: 'Just type — any unrecognized input is saved as a note', category: 'notes', example: 'Knowledge is justified true belief p42' },
+  { syntax: '<text>', desc: 'Just type \u2014 any unrecognized input is saved as a note', category: 'notes', example: 'Knowledge is justified true belief p42' },
   { syntax: 'e / edit <id>', desc: 'Edit a note inline (arrow keys to modify, Enter to save)', category: 'notes', example: 'e 1' },
   { syntax: 'del <id>', desc: 'Delete a note by ID', category: 'notes', example: 'del 5' },
   { syntax: 'find / f <query>', desc: 'Search notes by text (case-insensitive)', category: 'notes', example: 'find cave allegory' },
   { syntax: 's <name_or_id>', desc: 'Set session source (Tab to autocomplete)', category: 'sources', example: 's The Republic' },
   { syntax: 's', desc: 'Show current source and citation', category: 'sources', example: 's' },
-  { syntax: 's clear', desc: 'Unset source — future notes have no source', category: 'sources', example: 's clear' },
+  { syntax: 's clear', desc: 'Unset source \u2014 future notes have no source', category: 'sources', example: 's clear' },
   { syntax: 's<id> +t <tags>', desc: 'Add tag(s) to a note by ID', category: 'tags', example: 's1 +t ancient, plato' },
   { syntax: 's<id> -t <tags>', desc: 'Remove tag(s) from a note by ID', category: 'tags', example: 's2 -t cheese' },
   { syntax: 't <tags>', desc: 'Tag the last note created this session', category: 'tags', example: 't philosophy, epistemology' },
   { syntax: 'ns <name>', desc: 'New source for session (reuse or create)', category: 'sources', example: 'ns The Republic' },
-  { syntax: 'nse', desc: 'Source entry interview — MLA-ish fields', category: 'sources', example: 'nse' },
+  { syntax: 'nse', desc: 'Source entry interview \u2014 MLA-ish fields', category: 'sources', example: 'nse' },
   { syntax: 'vs <name_or_id>', desc: 'View/export notes by source', category: 'viewing', example: 'vs The Republic' },
   { syntax: 'vt <tag>', desc: 'View/export notes by tag', category: 'viewing', example: 'vt philosophy' },
   { syntax: 'va <Last, First>', desc: 'View/export notes by author', category: 'viewing', example: 'va Plato' },
@@ -1036,15 +1220,10 @@ class TerminalSimulator {
     this.nextTagId = 1;
     this.nextPublisherId = 1;
     this.nextAuthorId = 1;
-
-    // nse interview state machine
-    this.interviewMode = null; // null or { step, data }
-
-    // Demo state
+    this.interviewMode = null;
     this.demoRunning = false;
     this.demoStopped = false;
     this.inputEl = null;
-
     this._createInputLine();
   }
 
@@ -1058,60 +1237,46 @@ class TerminalSimulator {
   }
 
   _createInputLine() {
-    // Remove existing input line
     const existing = this.body.querySelector('.terminal-input-line');
     if (existing) existing.remove();
-
     const line = document.createElement('div');
     line.className = 'terminal-input-line';
-
     const prompt = document.createElement('span');
     prompt.className = 'terminal-prompt mono';
     prompt.textContent = this.promptText;
     line.appendChild(prompt);
-
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'terminal-input mono';
     input.spellcheck = false;
     input.autocomplete = 'off';
     line.appendChild(input);
-
     this.body.appendChild(line);
     this.inputEl = input;
-
     input.addEventListener('keydown', (e) => this._onKey(e));
   }
 
-  _scrollToBottom() {
-    this.body.scrollTop = this.body.scrollHeight;
-  }
+  _scrollToBottom() { this.body.scrollTop = this.body.scrollHeight; }
 
   _addLine(text, cls = '') {
     const div = document.createElement('div');
     div.className = 'terminal-line' + (cls ? ' ' + cls : '');
     div.textContent = text;
-    // Insert before input line
     const inputLine = this.body.querySelector('.terminal-input-line');
     this.body.insertBefore(div, inputLine);
     this._scrollToBottom();
   }
 
-  _addLines(lines, cls = '') {
-    lines.forEach(l => this._addLine(l, cls));
-  }
+  _addLines(lines, cls = '') { lines.forEach(l => this._addLine(l, cls)); }
 
   _onKey(e) {
     if (e.key === 'Enter') {
-      const val = this.inputEl.value;
-      this._submitCommand(val);
+      this._submitCommand(this.inputEl.value);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      if (this.history.length > 0) {
-        if (this.historyIndex < this.history.length - 1) {
-          this.historyIndex++;
-          this.inputEl.value = this.history[this.history.length - 1 - this.historyIndex];
-        }
+      if (this.history.length > 0 && this.historyIndex < this.history.length - 1) {
+        this.historyIndex++;
+        this.inputEl.value = this.history[this.history.length - 1 - this.historyIndex];
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -1126,17 +1291,12 @@ class TerminalSimulator {
   }
 
   _submitCommand(val) {
-    const prompt = this.promptText;
-    this._addLine(prompt + val);
+    this._addLine(this.promptText + val);
     this.inputEl.value = '';
     this.historyIndex = -1;
     if (val.trim()) this.history.push(val.trim());
-
-    if (this.interviewMode) {
-      this._handleInterview(val.trim());
-    } else {
-      this._dispatch(val.trim());
-    }
+    if (this.interviewMode) this._handleInterview(val.trim());
+    else this._dispatch(val.trim());
     this._refreshPrompt();
     this._scrollToBottom();
     if (!this.demoRunning) this.inputEl.focus();
@@ -1148,34 +1308,24 @@ class TerminalSimulator {
     if (promptEl) promptEl.textContent = this.promptText;
   }
 
-  focus() {
-    if (this.inputEl) this.inputEl.focus({ preventScroll: true });
-  }
+  focus() { if (this.inputEl) this.inputEl.focus({ preventScroll: true }); }
 
-  /* ─── Locator Parser (ported from locator.py) ─── */
   _parseLocator(text) {
     const trimmed = text.trimEnd();
-    // Time: t00:00 or t01:02:03
     const timeRe = /\s+(t\d{1,2}:\d{2}(?::\d{2})?)\s*$/i;
     let m = timeRe.exec(trimmed);
     if (m) {
-      const token = m[1];
-      const body = trimmed.slice(0, m.index).trimEnd();
-      return { body, type: 'time', value: token.slice(1) };
+      return { body: trimmed.slice(0, m.index).trimEnd(), type: 'time', value: m[1].slice(1) };
     }
-    // Page: p32, p.32, pp. 32-35
     const pageRe = /\s+(pp?\.?\s*\d+(?:\s*-\s*\d+)?)\s*$/i;
     m = pageRe.exec(trimmed);
     if (m) {
-      const token = m[1];
-      const body = trimmed.slice(0, m.index).trimEnd();
-      const value = token.replace(/^pp?\.?\s*/i, '').trim();
-      return { body, type: 'page', value };
+      const value = m[1].replace(/^pp?\.?\s*/i, '').trim();
+      return { body: trimmed.slice(0, m.index).trimEnd(), type: 'page', value };
     }
     return { body: text, type: null, value: null };
   }
 
-  /* ─── Citation Builder (ported from db.py) ─── */
   _buildCitation(sourceId) {
     const src = this.sources.find(s => s.id === sourceId);
     if (!src) return '';
@@ -1211,34 +1361,24 @@ class TerminalSimulator {
     return parts.join(' ');
   }
 
-  /* ─── Command Dispatch ─── */
   _dispatch(input) {
     if (!input) return;
     const upper = input.toUpperCase();
-
-    if (upper === 'EXIT' || upper === 'QUIT') {
-      this._addLine('Bye!', 'success');
-      return;
-    }
+    if (upper === 'EXIT' || upper === 'QUIT') { this._addLine('Bye!', 'success'); return; }
     if (upper === 'HELP') return this._cmdHelp();
     if (upper === 'B' || upper === 'BROWSE') return this._cmdBrowse();
     if (upper === 'NSE') return this._cmdNse();
-
-    // s<id> +t / -t
     const tagRe = /^s(\d+)\s+([+-]t)\s+(.+)$/i;
     const tm = tagRe.exec(input);
     if (tm) {
       const noteId = parseInt(tm[1]);
       const op = tm[2].toLowerCase();
-      const tags = tm[3];
-      if (op === '+t') return this._cmdNoteAddTags(noteId, tags);
-      else return this._cmdNoteRemoveTags(noteId, tags);
+      if (op === '+t') return this._cmdNoteAddTags(noteId, tm[3]);
+      else return this._cmdNoteRemoveTags(noteId, tm[3]);
     }
-
     const parts = input.split(/\s+(.+)/);
     const prefix = parts[0].toUpperCase();
     const arg = parts[1] || '';
-
     if (prefix === 'S') return this._cmdS(arg);
     if (prefix === 'T') return this._cmdT(arg);
     if (prefix === 'NS') return this._cmdNs(arg);
@@ -1246,16 +1386,13 @@ class TerminalSimulator {
     if (prefix === 'VT') return this._cmdVt(arg);
     if (prefix === 'VA') return this._cmdVa(arg);
     if (prefix === 'STADD') return this._cmdStadd(arg);
-
-    // Default: create note
     this._cmdNote(input);
   }
 
   _cmdHelp() {
-    const lines = [
-      '',
-      'Commands:',
-      '  <text>             Just type — saved as a note',
+    this._addLines([
+      '', 'Commands:',
+      '  <text>             Just type \u2014 saved as a note',
       '  s <name_or_id>     Set session source',
       '  s clear            Unset source',
       '  s<id> +t <tags>    Add tag(s) to note',
@@ -1269,14 +1406,11 @@ class TerminalSimulator {
       '  va <Last, First>   View/export notes by author',
       '  stadd <name>       Add a new source type',
       '  help               Show this help',
-      '  exit               Quit',
-      '',
+      '  exit               Quit', '',
       'Locator tokens (append to end of note):',
       '  p32       Page 32        pp. 10-15   Pages 10-15',
-      '  t1:23:45  Time 1:23:45',
-      '',
-    ];
-    this._addLines(lines, 'output');
+      '  t1:23:45  Time 1:23:45', '',
+    ], 'output');
   }
 
   _cmdNote(text) {
@@ -1286,7 +1420,6 @@ class TerminalSimulator {
     this.notes.push({ id, body, source_id: this.currentSourceId, locator_type: type, locator_value: value });
     this.sessionNoteIds.push(id);
     this.lastNoteId = id;
-
     const p = [`Saved note #${id}`];
     if (this.currentSourceId) {
       const src = this.sources.find(s => s.id === this.currentSourceId);
@@ -1335,8 +1468,6 @@ class TerminalSimulator {
     this.currentSourceId = id;
     const src = this.sources.find(s => s.id === id);
     this._addLine(`Source set: "${src.name}" (id:${id})`, 'success');
-
-    // Link sourceless session notes
     const sourceless = this.sessionNoteIds.filter(nid => {
       const n = this.notes.find(nn => nn.id === nid);
       return n && !n.source_id;
@@ -1351,30 +1482,18 @@ class TerminalSimulator {
   }
 
   _cmdT(tagsStr) {
-    if (!this.lastNoteId) {
-      this._addLine('No note created this session yet.', 'error');
-      return;
-    }
+    if (!this.lastNoteId) { this._addLine('No note created this session yet.', 'error'); return; }
     this._cmdNoteAddTags(this.lastNoteId, tagsStr);
   }
 
   _cmdNoteAddTags(noteId, tagsStr) {
     const note = this.notes.find(n => n.id === noteId);
-    if (!note) {
-      this._addLine(`Note #${noteId} not found.`, 'error');
-      return;
-    }
+    if (!note) { this._addLine(`Note #${noteId} not found.`, 'error'); return; }
     const names = tagsStr.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
-    if (!names.length) {
-      this._addLine('No tags specified.', 'error');
-      return;
-    }
+    if (!names.length) { this._addLine('No tags specified.', 'error'); return; }
     names.forEach(name => {
       let tag = this.tags.find(t => t.name === name);
-      if (!tag) {
-        tag = { id: this.nextTagId++, name };
-        this.tags.push(tag);
-      }
+      if (!tag) { tag = { id: this.nextTagId++, name }; this.tags.push(tag); }
       if (!this.noteTags[noteId]) this.noteTags[noteId] = [];
       if (!this.noteTags[noteId].includes(tag.id)) this.noteTags[noteId].push(tag.id);
     });
@@ -1383,10 +1502,7 @@ class TerminalSimulator {
 
   _cmdNoteRemoveTags(noteId, tagsStr) {
     const note = this.notes.find(n => n.id === noteId);
-    if (!note) {
-      this._addLine(`Note #${noteId} not found.`, 'error');
-      return;
-    }
+    if (!note) { this._addLine(`Note #${noteId} not found.`, 'error'); return; }
     const names = tagsStr.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
     const removed = [];
     names.forEach(name => {
@@ -1402,10 +1518,7 @@ class TerminalSimulator {
   }
 
   _cmdBrowse() {
-    if (!this.notes.length) {
-      this._addLine('No notes yet.', 'output');
-      return;
-    }
+    if (!this.notes.length) { this._addLine('No notes yet.', 'output'); return; }
     this._addLine('', '');
     this.notes.forEach(n => {
       let line = `  #${n.id}: ${n.body}`;
@@ -1427,10 +1540,7 @@ class TerminalSimulator {
 
   _cmdNs(arg) {
     const name = arg.trim();
-    if (!name) {
-      this._addLine('Usage: ns <source_name>', 'error');
-      return;
-    }
+    if (!name) { this._addLine('Usage: ns <source_name>', 'error'); return; }
     const existing = this._resolveSource(name);
     if (existing) {
       this.currentSourceId = existing;
@@ -1438,15 +1548,11 @@ class TerminalSimulator {
       this._addLine(`Source set: "${src.name}" (id:${existing})`, 'success');
       return;
     }
-    // Start nse interview with prefilled name
     this._startInterview(name);
   }
 
-  _cmdNse() {
-    this._startInterview(null);
-  }
+  _cmdNse() { this._startInterview(null); }
 
-  /* ─── NSE Interview State Machine ─── */
   _startInterview(prefilledName) {
     this._addLine('=== Source Entry Interview ===', 'accent');
     const data = {
@@ -1455,11 +1561,9 @@ class TerminalSimulator {
       publisher_name: null, publisher_city: null, publisher_id: null,
       authors: [],
     };
-
     if (prefilledName) {
       data.name = prefilledName;
       this._addLine(`Source title: ${prefilledName}`, 'output');
-      // Show types and go to type step
       this._showSourceTypes();
       this.interviewMode = { step: 'type', data };
     } else {
@@ -1470,9 +1574,7 @@ class TerminalSimulator {
 
   _showSourceTypes() {
     this._addLine('Source types:', 'output');
-    this.sourceTypes.forEach(t => {
-      this._addLine(`  ${t.id}. ${t.name}`, 'output');
-    });
+    this.sourceTypes.forEach(t => this._addLine(`  ${t.id}. ${t.name}`, 'output'));
     this._setInterviewPrompt('Source type (name or #, Enter to skip): ');
   }
 
@@ -1485,7 +1587,6 @@ class TerminalSimulator {
     const im = this.interviewMode;
     if (!im) return;
     const d = im.data;
-
     switch (im.step) {
       case 'title':
         if (!val) { this._addLine('Cancelled.', 'output'); this.interviewMode = null; return; }
@@ -1493,7 +1594,6 @@ class TerminalSimulator {
         this._showSourceTypes();
         im.step = 'type';
         break;
-
       case 'type':
         if (val) {
           if (/^\d+$/.test(val)) {
@@ -1507,43 +1607,30 @@ class TerminalSimulator {
         im.step = 'year';
         this._setInterviewPrompt('Year/date (Enter to skip): ');
         break;
-
       case 'year':
-        d.year = val || null;
-        im.step = 'url';
+        d.year = val || null; im.step = 'url';
         this._setInterviewPrompt('URL (Enter to skip): ');
         break;
-
       case 'url':
-        d.url = val || null;
-        im.step = 'accessed_date';
+        d.url = val || null; im.step = 'accessed_date';
         this._setInterviewPrompt('Accessed date (Enter to skip): ');
         break;
-
       case 'accessed_date':
-        d.accessed_date = val || null;
-        im.step = 'edition';
+        d.accessed_date = val || null; im.step = 'edition';
         this._setInterviewPrompt('Edition (Enter to skip): ');
         break;
-
       case 'edition':
-        d.edition = val || null;
-        im.step = 'pages';
+        d.edition = val || null; im.step = 'pages';
         this._setInterviewPrompt('Pages (range) (Enter to skip): ');
         break;
-
       case 'pages':
-        d.pages = val || null;
-        im.step = 'extra_notes';
+        d.pages = val || null; im.step = 'extra_notes';
         this._setInterviewPrompt('Extra notes (Enter to skip): ');
         break;
-
       case 'extra_notes':
-        d.extra_notes = val || null;
-        im.step = 'publisher_name';
+        d.extra_notes = val || null; im.step = 'publisher_name';
         this._setInterviewPrompt('Publisher name (Enter to skip): ');
         break;
-
       case 'publisher_name':
         d.publisher_name = val || null;
         if (val) {
@@ -1553,22 +1640,16 @@ class TerminalSimulator {
           this._finishSourceCreation(d);
         }
         break;
-
       case 'publisher_city':
         d.publisher_city = val || null;
         this._finishSourceCreation(d);
         break;
-
       case 'author_last':
-        if (!val) {
-          this._finishAuthors(d);
-          return;
-        }
+        if (!val) { this._finishAuthors(d); return; }
         d._currentAuthorLast = val;
         im.step = 'author_first';
         this._setInterviewPrompt(`  Author ${d.authors.length + 1} first name: `);
         break;
-
       case 'author_first':
         d.authors.push({
           last_name: d._currentAuthorLast,
@@ -1584,28 +1665,20 @@ class TerminalSimulator {
   }
 
   _finishSourceCreation(d) {
-    // Create publisher if needed
     if (d.publisher_name) {
       const pub = { id: this.nextPublisherId++, name: d.publisher_name, city: d.publisher_city };
       this.publishers.push(pub);
       d.publisher_id = pub.id;
     }
-
-    // Create source
     const srcId = this.nextSourceId++;
     this.sources.push({
-      id: srcId, name: d.name,
-      source_type_id: d.source_type_id,
-      year: d.year, url: d.url,
-      accessed_date: d.accessed_date,
-      edition: d.edition, pages: d.pages,
-      extra_notes: d.extra_notes,
+      id: srcId, name: d.name, source_type_id: d.source_type_id,
+      year: d.year, url: d.url, accessed_date: d.accessed_date,
+      edition: d.edition, pages: d.pages, extra_notes: d.extra_notes,
       publisher_id: d.publisher_id,
     });
     d._sourceId = srcId;
     this._addLine(`Source created: #${srcId} - ${d.name}`, 'success');
-
-    // Move to authors
     this._addLine('Add authors (empty last name to stop):', 'output');
     this.interviewMode.step = 'author_last';
     this._setInterviewPrompt(`  Author 1 last name: `);
@@ -1613,20 +1686,15 @@ class TerminalSimulator {
 
   _finishAuthors(d) {
     const srcId = d._sourceId;
-    // Save authors
     d.authors.forEach(a => {
       this.authors.push({
-        id: this.nextAuthorId++,
-        source_id: srcId,
-        first_name: a.first_name,
-        last_name: a.last_name,
+        id: this.nextAuthorId++, source_id: srcId,
+        first_name: a.first_name, last_name: a.last_name,
         author_order: a.author_order,
       });
     });
-
     const citation = this._buildCitation(srcId);
     if (citation) this._addLine('Citation: ' + citation, 'info');
-
     this.currentSourceId = srcId;
     this._addLine(`Source set: id:${srcId}`, 'success');
     this.interviewMode = null;
@@ -1640,13 +1708,11 @@ class TerminalSimulator {
     const src = this.sources.find(s => s.id === id);
     const srcNotes = this.notes.filter(n => n.source_id === id);
     this._addLine(`Export: ./exports/source_${id}_${src.name.toLowerCase().replace(/\s+/g, '_')}.md (${srcNotes.length} notes)`, 'info');
-    if (srcNotes.length) {
-      srcNotes.forEach(n => {
-        let line = `  #${n.id}: ${n.body}`;
-        if (n.locator_type) line += ` [${n.locator_type}=${n.locator_value}]`;
-        this._addLine(line, 'output');
-      });
-    }
+    srcNotes.forEach(n => {
+      let line = `  #${n.id}: ${n.body}`;
+      if (n.locator_type) line += ` [${n.locator_type}=${n.locator_value}]`;
+      this._addLine(line, 'output');
+    });
   }
 
   _cmdVt(arg) {
@@ -1659,9 +1725,7 @@ class TerminalSimulator {
       .map(([nid]) => parseInt(nid));
     const taggedNotes = this.notes.filter(n => taggedIds.includes(n.id));
     this._addLine(`Export: ./exports/tag_${tag.id}_${tag.name}.md (${taggedNotes.length} notes)`, 'info');
-    taggedNotes.forEach(n => {
-      this._addLine(`  #${n.id}: ${n.body}`, 'output');
-    });
+    taggedNotes.forEach(n => this._addLine(`  #${n.id}: ${n.body}`, 'output'));
   }
 
   _cmdVa(arg) {
@@ -1682,9 +1746,7 @@ class TerminalSimulator {
     const sourceIds = [...new Set(matchAuthors.map(a => a.source_id))];
     const authorNotes = this.notes.filter(n => sourceIds.includes(n.source_id));
     this._addLine(`Export: ./exports/author_${authorLast.toLowerCase()}.md (${authorNotes.length} notes)`, 'info');
-    authorNotes.forEach(n => {
-      this._addLine(`  #${n.id}: ${n.body}`, 'output');
-    });
+    authorNotes.forEach(n => this._addLine(`  #${n.id}: ${n.body}`, 'output'));
   }
 
   _cmdStadd(arg) {
@@ -1699,31 +1761,27 @@ class TerminalSimulator {
     this._addLine(`Source type created: #${id} - ${name}`, 'success');
   }
 
-  /* ─── Auto-Demo ─── */
   async runDemo() {
     this.demoRunning = true;
     this.demoStopped = false;
-
     const demoScript = [
       { cmd: 'Knowledge is justified true belief p42', delay: 2000 },
       { cmd: 'The cave allegory suggests we perceive shadows p514', delay: 600 },
       { cmd: 't philosophy, epistemology', delay: 500 },
       { cmd: 's1 +t ancient, plato', delay: 500 },
       { cmd: 'ns The Republic', delay: 400 },
-      // nse interview answers:
-      { cmd: '1', delay: 300 },          // type: Book
-      { cmd: '380 BCE', delay: 300 },    // year
-      { cmd: '', delay: 200 },           // url skip
-      { cmd: '', delay: 200 },           // accessed skip
-      { cmd: 'Revised', delay: 300 },    // edition
-      { cmd: '', delay: 200 },           // pages skip
-      { cmd: '', delay: 200 },           // extra notes skip
-      { cmd: 'Penguin Classics', delay: 300 }, // publisher
-      { cmd: 'London', delay: 300 },     // city
-      { cmd: 'Plato', delay: 300 },      // author 1 last
-      { cmd: '', delay: 200 },           // author 1 first (empty)
-      { cmd: '', delay: 200 },           // author 2 last (done)
-      // Continue with normal commands
+      { cmd: '1', delay: 300 },
+      { cmd: '380 BCE', delay: 300 },
+      { cmd: '', delay: 200 },
+      { cmd: '', delay: 200 },
+      { cmd: 'Revised', delay: 300 },
+      { cmd: '', delay: 200 },
+      { cmd: '', delay: 200 },
+      { cmd: 'Penguin Classics', delay: 300 },
+      { cmd: 'London', delay: 300 },
+      { cmd: 'Plato', delay: 300 },
+      { cmd: '', delay: 200 },
+      { cmd: '', delay: 200 },
       { cmd: 's The Republic', delay: 500 },
       { cmd: 'Philosopher kings must rule pp. 10-15', delay: 600 },
       { cmd: 'Interesting discussion of Book VII t0:32', delay: 600 },
@@ -1735,7 +1793,6 @@ class TerminalSimulator {
       { cmd: 'vt philosophy', delay: 500 },
       { cmd: 'va Plato', delay: 500 },
     ];
-
     await this._wait(1500);
     for (let i = 0; i < demoScript.length; i++) {
       const step = demoScript[i];
@@ -1746,23 +1803,16 @@ class TerminalSimulator {
       if (this.demoStopped) break;
       this._submitCommand(step.cmd);
       if (this.demoStopped) break;
-      // Extra pause after first line so user can read it
       await this._wait(i === 0 ? 2000 : 250);
     }
-
     this.demoRunning = false;
   }
 
-  _wait(ms) {
-    return new Promise(r => setTimeout(r, ms));
-  }
+  _wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async _typeText(text, charDelay) {
     for (let i = 0; i < text.length; i++) {
-      if (this.demoStopped) {
-        this.inputEl.value = '';
-        return;
-      }
+      if (this.demoStopped) { this.inputEl.value = ''; return; }
       this.inputEl.value += text[i];
       await this._wait(charDelay);
     }
@@ -1772,7 +1822,6 @@ class TerminalSimulator {
     this.demoStopped = true;
     this.demoRunning = false;
     this.inputEl.value = '';
-    // If in interview mode during demo stop, exit it
     if (this.interviewMode) {
       this.interviewMode = null;
       this._refreshPrompt();
@@ -1787,7 +1836,6 @@ const bodyEl = document.getElementById('terminal-body');
 const hintEl = document.getElementById('terminal-hint');
 const terminal = new TerminalSimulator(bodyEl, hintEl);
 
-// Stop demo on interaction
 let userInteracted = false;
 function onUserInteract() {
   if (!userInteracted) {
@@ -1800,9 +1848,7 @@ function onUserInteract() {
 
 document.getElementById('terminal').addEventListener('click', onUserInteract);
 document.addEventListener('keydown', function(e) {
-  // Only capture typing keys, not modifiers
   if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Enter') {
-    // If we're near the terminal section, interact
     const termRect = document.getElementById('terminal').getBoundingClientRect();
     if (termRect.top < window.innerHeight && termRect.bottom > 0) {
       onUserInteract();
@@ -1810,13 +1856,15 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Start auto-demo
 terminal.runDemo();
 
 /* ═══════════════════════════════════════════
    COMMANDS SECTION
    ═══════════════════════════════════════════ */
 const commandsGrid = document.getElementById('commands-grid');
+
+function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escAttr(s) { return s.replace(/"/g, '&quot;').replace(/&/g, '&amp;'); }
 
 function renderCommands() {
   commandsGrid.innerHTML = '';
@@ -1825,7 +1873,6 @@ function renderCommands() {
     card.className = 'command-card';
     card.dataset.category = cmd.category;
     card.dataset.search = (cmd.syntax + ' ' + cmd.desc).toLowerCase();
-
     card.innerHTML = `
       <div class="command-syntax">${escHtml(cmd.syntax)}</div>
       <div class="command-desc">${escHtml(cmd.desc)}</div>
@@ -1837,7 +1884,6 @@ function renderCommands() {
     commandsGrid.appendChild(card);
   });
 
-  // Try-it click handlers
   commandsGrid.querySelectorAll('.command-try').forEach(el => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1852,12 +1898,8 @@ function renderCommands() {
   });
 }
 
-function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function escAttr(s) { return s.replace(/"/g, '&quot;').replace(/&/g, '&amp;'); }
-
 renderCommands();
 
-// Search + filter
 const searchInput = document.getElementById('commands-search');
 const filterBtns = document.querySelectorAll('.filter-btn');
 let activeFilter = 'all';
@@ -1892,7 +1934,6 @@ function renderSchema() {
     const card = document.createElement('div');
     card.className = 'table-card';
     card.dataset.table = table.name;
-
     let fieldsHtml = '';
     table.fields.forEach(f => {
       let badges = '';
@@ -1900,48 +1941,38 @@ function renderSchema() {
       if (f.fk) badges += '<span class="field-badge field-fk">FK</span>';
       fieldsHtml += `<div class="table-field"><code>${f.name}</code>${badges}<span class="field-type">${f.type}</span></div>`;
     });
-
     card.innerHTML = `
       <div class="table-card-header"><span class="table-icon">&#9638;</span> ${table.name}</div>
       <div class="table-card-fields">${fieldsHtml}</div>
     `;
     schemaGrid.appendChild(card);
   });
-
-  // Draw FK lines after layout
   requestAnimationFrame(() => { requestAnimationFrame(drawSchemaLines); });
 }
 
 function drawSchemaLines() {
   const svg = document.getElementById('schema-svg');
   const container = document.getElementById('schema-container');
-  const rect = container.getBoundingClientRect();
-
   svg.setAttribute('width', container.offsetWidth);
   svg.setAttribute('height', container.offsetHeight);
   svg.innerHTML = '';
-
   const fkPairs = [];
   SCHEMA_TABLES.forEach(table => {
     table.fields.forEach(f => {
       if (f.fk) fkPairs.push({ from: table.name, to: f.fk, field: f.name });
     });
   });
-
   fkPairs.forEach(pair => {
     const fromCard = schemaGrid.querySelector(`[data-table="${pair.from}"]`);
     const toCard = schemaGrid.querySelector(`[data-table="${pair.to}"]`);
     if (!fromCard || !toCard) return;
-
     const fromRect = fromCard.getBoundingClientRect();
     const toRect = toCard.getBoundingClientRect();
     const contRect = container.getBoundingClientRect();
-
     const x1 = fromRect.left + fromRect.width / 2 - contRect.left;
     const y1 = fromRect.top + fromRect.height / 2 - contRect.top;
     const x2 = toRect.left + toRect.width / 2 - contRect.left;
     const y2 = toRect.top + toRect.height / 2 - contRect.top;
-
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', x1);
     line.setAttribute('y1', y1);
@@ -1976,8 +2007,6 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
 document.querySelector('.hamburger').addEventListener('click', () => {
   document.querySelector('.nav-links').classList.toggle('open');
 });
-
-// Close menu on link click
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => {
     document.querySelector('.nav-links').classList.remove('open');
@@ -1989,18 +2018,14 @@ document.querySelectorAll('.nav-links a').forEach(a => {
    ═══════════════════════════════════════════ */
 const fadeObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
+    if (entry.isIntersecting) entry.target.classList.add('visible');
   });
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
 
-// Active nav highlighting
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
-
 const navObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -2010,7 +2035,7 @@ const navObserver = new IntersectionObserver((entries) => {
       });
     }
   });
-}, { threshold: 0.3, rootMargin: '-60px 0px 0px 0px' });
+}, { threshold: 0.3, rootMargin: '-56px 0px 0px 0px' });
 
 sections.forEach(s => navObserver.observe(s));
 
