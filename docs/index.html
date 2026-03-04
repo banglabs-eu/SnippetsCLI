@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snippets CLI — Note-taking for your terminal</title>
+<title>cli.snippets — Note-taking for your terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -827,7 +827,7 @@ footer a:hover { color: var(--text); text-decoration: underline; }
 <!-- Navigation -->
 <nav>
   <div class="nav-brand">
-    <a href="#hero">&gt;_ snippets<span>.cli</span></a>
+    <a href="#hero">&gt;_ cli<span>.snippets</span></a>
     <a href="https://bang-labs.eu" class="nav-org" target="_blank" rel="noopener">Bang Labs</a>
   </div>
   <button class="hamburger" aria-label="Menu">&#9776;</button>
@@ -848,7 +848,7 @@ footer a:hover { color: var(--text); text-decoration: underline; }
     <a href="https://bang-labs.eu" class="hero-org-badge" target="_blank" rel="noopener">
       <span class="org-name">Bang Labs</span>
       <span class="org-sep">/</span>
-      <span class="org-project">snippets-cli</span>
+      <span class="org-project">cli.snippets</span>
     </a>
     <h1 class="hero-title">Note-taking for<br>your <em>terminal</em></h1>
     <p class="hero-subtitle">A PostgreSQL-backed REPL for capturing Markdown snippets with source citations, tags, locator references, and structured export.</p>
@@ -859,10 +859,10 @@ footer a:hover { color: var(--text); text-decoration: underline; }
       <span class="terminal-dot red"></span>
       <span class="terminal-dot yellow"></span>
       <span class="terminal-dot green"></span>
-      <span class="terminal-titlebar-text">snippets-cli</span>
+      <span class="terminal-titlebar-text">cli.snippets</span>
     </div>
     <div class="terminal-body" id="terminal-body">
-      <div class="terminal-line info">Snippets CLI ready. Type 'help' for commands.</div>
+      <div class="terminal-line info">cli.snippets ready. Type 'help' for commands.</div>
       <div class="terminal-line dim"></div>
     </div>
     <div class="terminal-click-hint" id="terminal-hint">click or start typing to interact</div>
@@ -1026,8 +1026,8 @@ footer a:hover { color: var(--text); text-decoration: underline; }
         <p>Clone the repository and install Python dependencies in a virtual environment.</p>
         <div class="code-block">
           <button class="copy-btn" data-copy="clone-install">Copy</button>
-          <pre id="clone-install">git clone https://github.com/banglabs-eu/snippets-cli.git
-cd snippets-cli
+          <pre id="clone-install">git clone https://github.com/banglabs-eu/cli.snippets.git
+cd cli.snippets
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt</pre>
@@ -1076,7 +1076,7 @@ python main.py</pre>
   <p>Open source. Built in public. Contributions welcome.</p>
   <p style="margin-top: 6px;">MIT License &copy; 2026 Adam Bang Kjems</p>
   <div class="footer-links">
-    <a href="https://github.com/banglabs-eu/snippets-cli">GitHub</a>
+    <a href="https://github.com/banglabs-eu/cli.snippets">GitHub</a>
     <a href="https://bang-labs.eu" target="_blank" rel="noopener">bang-labs.eu</a>
   </div>
 </footer>
@@ -1231,9 +1231,9 @@ class TerminalSimulator {
     if (this.interviewMode) return '';
     if (this.currentSourceId) {
       const src = this.sources.find(s => s.id === this.currentSourceId);
-      return `snippets [${src ? src.name : '?'}]> `;
+      return `cli.snippets [${src ? src.name : '?'}]> `;
     }
-    return 'snippets> ';
+    return 'cli.snippets> ';
   }
 
   _createInputLine() {

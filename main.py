@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Snippets CLI - A note-taking REPL with PostgreSQL storage."""
+"""cli.Snippets - A note-taking REPL with PostgreSQL storage."""
 
 import os
 from pathlib import Path
@@ -55,7 +55,7 @@ def main():
     def _insert_newline(event):
         event.current_buffer.insert_text("\n")
 
-    print(_("main.ready"))
+    print(_("main.ready", S=_("app.snippets")))
     if client.is_authenticated():
         try:
             user = client.me()
@@ -77,7 +77,7 @@ def main():
             except (httpx.NetworkError, httpx.TimeoutException):
                 src_label = f" [{_('main.offline')}]"
 
-            user_input = prompt(f"snippets{src_label}> ", history=history,
+            user_input = prompt(f"cli.{_('app.snippets')}{src_label}> ", history=history,
                                 completer=completer, complete_while_typing=False,
                                 key_bindings=kb)
         except (EOFError, KeyboardInterrupt):

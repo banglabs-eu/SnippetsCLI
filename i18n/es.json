@@ -1,8 +1,10 @@
 {
+  "app.snippets": "Snippets",
+
   "main.backend_unreachable": "Error: No se puede conectar con SnippetsBackend.",
   "main.backend_hint": "Asegurate de que el backend esté corriendo (docker compose up --build).",
   "main.backend_check": "Verificá que el backend siga en ejecución.",
-  "main.ready": "Snippets CLI listo. Escribí 'help' para ver los comandos.",
+  "main.ready": "cli.{S} listo. Escribí 'help' para ver los comandos.",
   "main.logged_in_as": "Sesión iniciada como {username}.",
   "main.session_expired": "La sesión expiró. Usá 'login' para conectarte de nuevo.",
   "main.not_logged_in": "No hay sesión activa. Escribí 'login' o 'register' para comenzar.",
