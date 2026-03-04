@@ -1007,38 +1007,31 @@ footer a:hover { color: var(--accent-light); text-decoration: underline; }
 <!-- Setup -->
 <section id="setup">
   <span class="section-label fade-in">05 / Getting Started</span>
-  <h2 class="section-title fade-in">Three steps to start taking notes</h2>
-  <p class="section-subtitle fade-in">Clone, configure, run.</p>
+  <h2 class="section-title fade-in">One command to start taking notes</h2>
+  <p class="section-subtitle fade-in">Install, connect, run.</p>
   <div class="setup-steps fade-in">
 
     <div class="setup-step">
       <div class="step-number">1</div>
       <div class="step-content">
-        <h3>Clone &amp; Install</h3>
-        <p>Clone the repository and install Python dependencies in a virtual environment.</p>
+        <h3>Install</h3>
+        <p>Run the install script. It clones the repo, sets up a virtual environment, installs dependencies, and configures everything interactively.</p>
         <div class="code-block">
           <button class="copy-btn" data-copy="clone-install">Copy</button>
-          <pre id="clone-install">git clone https://github.com/banglabs-eu/cli.snippets.git
-cd cli.snippets
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt</pre>
+          <pre id="clone-install">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
         </div>
+        <p style="margin-top: 8px; color: var(--text-dim); font-size: 0.85em;">Requires Python 3.10+ and git. The installer will ask whether to connect to an existing backend or self-host with Docker.</p>
       </div>
     </div>
 
     <div class="setup-step">
       <div class="step-number">2</div>
       <div class="step-content">
-        <h3>Configure Environment</h3>
-        <p>Copy <code>.env.example</code> to <code>.env</code> and set your backend URL and export directory.</p>
+        <h3>Run</h3>
+        <p>After installation, launch the CLI from anywhere.</p>
         <div class="code-block">
-          <button class="copy-btn" data-copy="env-config">Copy</button>
-          <pre id="env-config">cp .env.example .env
-
-# Edit .env:
-BACKEND_URL=http://localhost:8000
-EXPORT_DIR=./exports</pre>
+          <button class="copy-btn" data-copy="run-cmd">Copy</button>
+          <pre id="run-cmd">snippets</pre>
         </div>
       </div>
     </div>
@@ -1046,15 +1039,11 @@ EXPORT_DIR=./exports</pre>
     <div class="setup-step">
       <div class="step-number">3</div>
       <div class="step-content">
-        <h3>Run</h3>
-        <p>Start the backend, then launch the CLI.</p>
+        <h3>Update</h3>
+        <p>Re-run the installer to pull the latest version.</p>
         <div class="code-block">
-          <button class="copy-btn" data-copy="run-cmd">Copy</button>
-          <pre id="run-cmd"># Backend (separate repo)
-docker compose up --build
-
-# CLI
-python main.py</pre>
+          <button class="copy-btn" data-copy="env-config">Copy</button>
+          <pre id="env-config">curl -fsSL https://raw.githubusercontent.com/banglabs-eu/cli.snippets/main/install.sh | bash</pre>
         </div>
       </div>
     </div>

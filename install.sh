@@ -70,7 +70,7 @@ dim "Using $($PYTHON --version)"
 echo ""
 printf "${BOLD}How do you want to connect?${RESET}\n"
 echo ""
-echo "  1) Connect to an existing backend (hosted or someone else's)"
+echo "  1) Connect to backend.snippets.eu (recommended)"
 echo "  2) Self-host — run your own backend + database"
 echo ""
 ask "Choose [1/2]: "
@@ -206,11 +206,10 @@ MGMT
   chmod +x "$BIN_DIR/snippets-backend"
 
 else
-  # ── Connect to existing backend ──
+  # ── Connect to backend.snippets.eu ──
 
-  echo ""
-  ask "Backend URL [https://backend-api.snippts.eu]: "
-  BACKEND_URL="${REPLY:-https://backend-api.snippts.eu}"
+  BACKEND_URL="https://api.snippets.eu"
+  info "Using backend at $BACKEND_URL"
 fi
 
 # ── CLI .env ──
