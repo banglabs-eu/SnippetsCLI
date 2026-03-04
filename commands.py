@@ -68,7 +68,7 @@ Commands:
   s<id> -t <tags>    Remove tag(s) from note (e.g. s2 -t cheese)
   del <id>           Delete a note (e.g. del 5)
   t <tags>           Tag the last note (Tab to autocomplete)
-  b                  Browse all notes (rendered markdown)
+  b / ls             Browse all notes (rendered markdown)
   ns <name>          New source for session (reuse existing or create via nse)
   nse                Source entry interview (MLA-ish fields)
   vs <name_or_id>    View/export notes by source
@@ -124,15 +124,23 @@ def cmd_note(session: Session, text: str):
 def cmd_s(session: Session, arg: str):
     arg = arg.strip()
     if not arg:
+        sources = client.get_all_sources()
+        if sources:
+            print("Sources:")
+            for src in sources:
+                marker = "*" if src["id"] == session.current_source_id else " "
+                print(f"  {marker} {src['id']}. {src['name']}")
+        else:
+            print("No sources yet. Use: ns <name> to create one.")
         if session.current_source_id:
             src = client.get_source(session.current_source_id)
             if src:
                 citation = client.build_citation(session.current_source_id)
-                print(f'Current source: "{src["name"]}" (id:{src["id"]})')
+                print(f'Current: "{src["name"]}" (id:{src["id"]})')
                 if citation:
                     print(f"  {citation}")
-                return
-        print("No source set. Use: s <name_or_id>")
+        else:
+            print("No source set. Use: s <name_or_id>")
         return
 
     if arg.lower() in ("clear", "none"):
@@ -204,7 +212,7 @@ def cmd_note_delete(note_id: int):
         return
     ok = client.delete_note(note_id)
     if ok:
-        print(f"Deleted note #{note_id}.")
+        print(f"Deleted note #{note_id}:\n{note['body']}")
 
 
 # ─── t <tags> (tag last note) ───
@@ -435,7 +443,7 @@ def dispatch(user_input: str, session: Session, export_dir: str) -> bool:
         cmd_help()
         return True
 
-    if cmd in ("B", "BROWSE"):
+    if cmd in ("B", "BROWSE", "LS"):
         cmd_browse(export_dir)
         return True
 

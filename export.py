@@ -59,7 +59,7 @@ def export_all(export_dir: str) -> tuple[str, list[dict]]:
 
     lines = []
     for note in notes:
-        lines.append(f"*{note['created_at']}*")
+        lines.append(f"**#{note['id']}** | *{note['created_at']}*")
         lines.append("")
         lines.append(note["body"])
         lines.append("")
