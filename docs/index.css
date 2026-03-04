@@ -67,7 +67,7 @@ nav {
   height: 34px;
   padding: 0 6px;
   background: var(--accent);
-  color: var(--bg);
+  color: #fff;
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 16px;
@@ -199,23 +199,23 @@ section {
   padding: 5px 16px;
   border-radius: 20px;
   background: var(--accent-glow);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   text-decoration: none;
   transition: background var(--transition), border-color var(--transition);
 }
 .hero-org-badge:hover {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 .hero-org-badge .org-name {
   font-size: 13px;
   font-weight: 600;
-  background: linear-gradient(135deg, #fef3c7, #f59e0b, #d97706);
+  background: linear-gradient(135deg, #c7d2fe, #6366f1, #4f46e5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.hero-org-badge .org-sep { color: rgba(245, 158, 11, 0.35); font-size: 13px; }
+.hero-org-badge .org-sep { color: rgba(99, 102, 241, 0.35); font-size: 13px; }
 .hero-org-badge .org-project { font-size: 12px; color: var(--text-dim); }
 .hero-title {
   font-family: var(--font-display);
@@ -376,7 +376,7 @@ section {
   font-weight: 700;
   letter-spacing: 0.03em;
 }
-.badge-notes { background: var(--accent-glow); color: var(--accent); }
+.badge-notes { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .badge-sources { background: rgba(85, 136, 238, 0.1); color: var(--blue); }
 .badge-tags { background: rgba(153, 119, 238, 0.1); color: var(--purple); }
 .badge-viewing { background: rgba(238, 166, 34, 0.1); color: var(--amber); }
@@ -469,7 +469,7 @@ section {
 }
 .filter-btn:hover { border-color: var(--text-faint); color: var(--text-dim); }
 .filter-btn.active {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(99, 102, 241, 0.2);
   border-color: var(--accent);
   color: var(--accent-light);
 }
@@ -630,7 +630,7 @@ section {
   line-height: 1;
   letter-spacing: 4px;
 }
-.arch-card.entry { border-color: rgba(245, 158, 11, 0.35); }
+.arch-card.entry { border-color: rgba(99, 102, 241, 0.35); }
 .arch-card.core { border-color: rgba(85, 136, 238, 0.35); }
 .arch-card.data { border-color: rgba(238, 166, 34, 0.35); }
 .arch-card.external {
@@ -661,7 +661,7 @@ section {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 14px;
-  color: var(--bg);
+  color: #fff;
   box-shadow: 0 0 16px var(--accent-glow);
 }
 .step-content { flex: 1; }
@@ -733,7 +733,7 @@ footer a:hover { color: var(--accent-light); text-decoration: underline; }
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 4px;
-  background: linear-gradient(135deg, #fef3c7, #f59e0b, #d97706);
+  background: linear-gradient(135deg, #c7d2fe, #6366f1, #4f46e5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
