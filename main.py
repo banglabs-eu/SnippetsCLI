@@ -39,7 +39,7 @@ EXPORT_DIR = os.environ.get("EXPORT_DIR", "./exports")
 
 def _unlock_cache():
     """Prompt for password to derive the local encryption key."""
-    for _ in range(3):
+    for _attempt in range(3):
         try:
             password = getpass.getpass(_("main.unlock_prompt"))
         except (EOFError, KeyboardInterrupt):

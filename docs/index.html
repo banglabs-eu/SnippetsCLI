@@ -140,6 +140,16 @@
       <h3>Multi-user Auth</h3>
       <p>JWT login with invite-code registration. Per-user data isolation, password changes, and admin invite management.</p>
     </div>
+    <div class="card feature-card fade-in">
+      <span class="feature-icon">&#9992;</span>
+      <h3>Offline Mode</h3>
+      <p>Keep taking notes when the backend is unreachable. Notes are stored locally and automatically sync back when you reconnect.</p>
+    </div>
+    <div class="card feature-card fade-in">
+      <span class="feature-icon">&#128272;</span>
+      <h3>Encrypted Local Cache</h3>
+      <p>All local data &mdash; offline notes and autocomplete cache &mdash; is encrypted at rest with a password-derived key (PBKDF2 + Fernet).</p>
+    </div>
   </div>
 </section>
 
@@ -220,6 +230,21 @@
       <div class="card arch-card">
         <div class="filename">picker.py</div>
         <div class="filedesc">Interactive note picker</div>
+      </div>
+    </div>
+    <div class="arch-arrow">&darr;</div>
+    <div class="arch-row">
+      <div class="card arch-card">
+        <div class="filename">offline.py</div>
+        <div class="filedesc">Local note storage &amp; sync</div>
+      </div>
+      <div class="card arch-card">
+        <div class="filename">cache.py</div>
+        <div class="filedesc">Encrypted autocomplete cache</div>
+      </div>
+      <div class="card arch-card">
+        <div class="filename">crypto.py</div>
+        <div class="filedesc">PBKDF2 + Fernet encryption</div>
       </div>
     </div>
     <div class="arch-arrow">&darr;</div>

@@ -406,6 +406,38 @@ code, .mono {
     </table>
   </div>
 
+  <!-- Offline & Encryption -->
+  <div class="section">
+    <h2 class="cat-system">Offline &amp; Encryption</h2>
+    <p class="section-note">When the backend is unreachable, the CLI offers offline mode. Local data is encrypted at rest.</p>
+    <table class="ref-table">
+      <tr>
+        <td class="mono">Offline mode</td>
+        <td class="desc">If the backend is down at startup, you are prompted to enter offline mode. Notes are saved locally.</td>
+      </tr>
+      <tr>
+        <td class="mono">Auto-sync</td>
+        <td class="desc">On next login the CLI detects pending offline notes and offers to upload them to the backend.</td>
+      </tr>
+      <tr>
+        <td class="mono">Local cache</td>
+        <td class="desc">Sources, tags, and authors are cached locally for Tab completion even when offline.</td>
+      </tr>
+      <tr>
+        <td class="mono">Encryption</td>
+        <td class="desc">Cache and offline notes are encrypted with a password-derived key (PBKDF2-SHA256 600k iterations + Fernet). You set the password on first use.</td>
+      </tr>
+      <tr>
+        <td class="mono">Unlock prompt</td>
+        <td class="desc">On startup you are asked for your encryption password (3 attempts). Skip to run without decrypting local data.</td>
+      </tr>
+      <tr>
+        <td class="mono">Re-key on passwd</td>
+        <td class="desc">Changing your password re-encrypts all local <code>.enc</code> files with the new key.</td>
+      </tr>
+    </table>
+  </div>
+
   <!-- NSE Interview Fields -->
   <div class="section">
     <h2 class="cat-sources">NSE Interview Fields</h2>
