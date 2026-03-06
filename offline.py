@@ -5,8 +5,9 @@ from datetime import datetime
 from pathlib import Path
 
 import client
+import crypto
 
-OFFLINE_FILE = Path.home() / ".snippets_cli" / "offline_notes.md"
+OFFLINE_FILE = Path.home() / ".snippets_cli" / "offline_notes.enc"
 
 
 class OfflineStore:
@@ -77,12 +78,25 @@ class OfflineStore:
             lines.append("")
             lines.append("---")
             lines.append("")
-        OFFLINE_FILE.write_text("\n".join(lines), encoding="utf-8")
+        content = "\n".join(lines)
+        if crypto.is_ready():
+            OFFLINE_FILE.write_bytes(crypto.encrypt(content))
+        else:
+            OFFLINE_FILE.write_text(content, encoding="utf-8")
 
     def _load(self):
         if not OFFLINE_FILE.exists():
             return
-        text = OFFLINE_FILE.read_text(encoding="utf-8")
+        if crypto.is_ready():
+            try:
+                text = crypto.decrypt(OFFLINE_FILE.read_bytes())
+            except Exception:
+                return
+        else:
+            try:
+                text = OFFLINE_FILE.read_text(encoding="utf-8")
+            except Exception:
+                return
         self.notes = _parse_offline_md(text)
 
 

@@ -4,8 +4,9 @@ import json
 from pathlib import Path
 
 import client
+import crypto
 
-CACHE_FILE = Path.home() / ".snippets_cli" / "cache.json"
+CACHE_FILE = Path.home() / ".snippets_cli" / "cache.enc"
 
 _data: dict = {"sources": [], "tags": [], "authors": []}
 
@@ -13,11 +14,15 @@ _data: dict = {"sources": [], "tags": [], "authors": []}
 def load():
     """Load cache from disk into memory."""
     global _data
-    if CACHE_FILE.exists():
-        try:
-            _data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            _data = {"sources": [], "tags": [], "authors": []}
+    if not CACHE_FILE.exists():
+        return
+    if not crypto.is_ready():
+        return
+    try:
+        plaintext = crypto.decrypt(CACHE_FILE.read_bytes())
+        _data = json.loads(plaintext)
+    except Exception:
+        _data = {"sources": [], "tags": [], "authors": []}
 
 
 def refresh():
@@ -28,8 +33,10 @@ def refresh():
         "tags": client.get_all_tags(),
         "authors": client.get_all_authors(),
     }
+    if not crypto.is_ready():
+        return
     CACHE_FILE.parent.mkdir(exist_ok=True)
-    CACHE_FILE.write_text(json.dumps(_data, ensure_ascii=False), encoding="utf-8")
+    CACHE_FILE.write_bytes(crypto.encrypt(json.dumps(_data, ensure_ascii=False)))
 
 
 # ── search helpers (mirror client API, work on local data) ──

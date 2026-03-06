@@ -14,9 +14,12 @@ from prompt_toolkit.input.ansi_escape_sequences import ANSI_SEQUENCES
 from prompt_toolkit.input.vt100_parser import _IS_PREFIX_OF_LONGER_MATCH_CACHE
 from prompt_toolkit.keys import Keys
 
+import getpass
+
 import cache
 import client
 import completers as completers_mod
+import crypto
 import i18n
 import offline
 from i18n import _
@@ -32,6 +35,22 @@ load_dotenv()
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 EXPORT_DIR = os.environ.get("EXPORT_DIR", "./exports")
+
+
+def _unlock_cache():
+    """Prompt for password to derive the local encryption key."""
+    for _ in range(3):
+        try:
+            password = getpass.getpass(_("main.unlock_prompt"))
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not password:
+            break
+        if crypto.derive_key(password):
+            return
+        print(_("main.unlock_failed"))
+    print(_("main.unlock_skipped"))
 
 
 def _try_sync_offline():
@@ -74,6 +93,8 @@ def main():
         if answer not in ("y", "yes"):
             return
         session.offline_mode = True
+        if crypto.has_encryption():
+            _unlock_cache()
         session.offline_store = offline.OfflineStore()
         completers_mod.offline_mode = True
         cache.load()
@@ -101,11 +122,13 @@ def main():
             try:
                 user = client.me()
                 print(_("main.logged_in_as", username=user['username']))
+                _unlock_cache()
                 cache.refresh()
                 _try_sync_offline()
             except client.AuthExpiredError:
                 print(_("main.session_expired"))
                 client.clear_token()
+                crypto.clear()
         else:
             print(_("main.not_logged_in"))
 

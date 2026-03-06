@@ -11,6 +11,7 @@ import getpass
 
 import cache
 import client
+import crypto
 import export
 import i18n
 import offline
@@ -453,6 +454,7 @@ def cmd_login(session: Session):
     try:
         data = client.login(username, password)
         session.reset()
+        crypto.derive_key(password)
         print(_("cmd.login.success", username=data['username']))
         cache.refresh()
         _try_sync_after_login()
@@ -478,6 +480,7 @@ def cmd_register(session: Session):
     try:
         data = client.register(username, password, invite_code)
         session.reset()
+        crypto.derive_key(password)
         print(_("cmd.register.success", username=data['username']))
     except client.ConflictError:
         print(_("cmd.register.taken"))
@@ -501,6 +504,8 @@ def cmd_change_password():
         return
     try:
         client.change_password(current, new_pw)
+        if crypto.is_ready():
+            crypto.rekey(new_pw)
         print(_("cmd.passwd.success"))
     except ValueError as e:
         print(_("cmd.passwd.failed", detail=e))
@@ -545,6 +550,7 @@ def cmd_whoami():
 def cmd_logout(session: Session):
     client.logout()
     session.reset()
+    crypto.clear()
     print(_("cmd.logout.success"))
 
 
@@ -701,6 +707,7 @@ def dispatch(user_input: str, session: Session, export_dir: str) -> bool:
         print(_("cmd.session_expired"))
         client.clear_token()
         session.reset()
+        crypto.clear()
         return True
 
 

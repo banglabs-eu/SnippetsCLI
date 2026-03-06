@@ -135,6 +135,10 @@
   "export.search_heading": "Pesquisa: {query}",
   "export.author_heading": "Autor: {last}, {first}",
 
+  "main.unlock_prompt": "Senha (desbloquear cache local): ",
+  "main.unlock_failed": "Senha incorreta.",
+  "main.unlock_skipped": "Cache local indisponível — continuando sem cache.",
+
   "lang.current": "Idioma atual: {lang}",
   "lang.changed": "Idioma alterado para {lang}.",
   "lang.invalid": "Idioma desconhecido '{code}'. Disponíveis: {available}"

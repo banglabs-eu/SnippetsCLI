@@ -135,6 +135,10 @@
   "export.search_heading": "Búsqueda: {query}",
   "export.author_heading": "Autor: {last}, {first}",
 
+  "main.unlock_prompt": "Contraseña (desbloquear caché local): ",
+  "main.unlock_failed": "Contraseña incorrecta.",
+  "main.unlock_skipped": "Caché local no disponible — continuando sin caché.",
+
   "lang.current": "Idioma actual: {lang}",
   "lang.changed": "Idioma cambiado a {lang}.",
   "lang.invalid": "Idioma desconocido '{code}'. Disponibles: {available}"

@@ -145,6 +145,10 @@
   "export.search_heading": "Search: {query}",
   "export.author_heading": "Author: {last}, {first}",
 
+  "main.unlock_prompt": "Password (unlock local cache): ",
+  "main.unlock_failed": "Wrong password.",
+  "main.unlock_skipped": "Local cache unavailable — continuing without it.",
+
   "lang.current": "Current language: {lang}",
   "lang.changed": "Language changed to {lang}.",
   "lang.invalid": "Unknown language '{code}'. Available: {available}"
